@@ -446,6 +446,14 @@
     }
     .modal-close:hover { transform: scale(1.1); background: #fff; }
 
+    .modal-gallery { position: relative; }
+    .gallery-nav { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; }
+    .gallery-btn { background: none; border: 2px solid #ccc; border-radius: 50%; width: 36px; height: 36px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .gallery-btn:hover { background: #f0f0f0; }
+    .gallery-dots { display: flex; gap: 6px; }
+    .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: background 0.2s; }
+    .gallery-dot.active { background: #388e3c; }
+
     .modal-body {
       padding: 28px;
     }
@@ -713,7 +721,14 @@
   <div class="modal" id="modal">
     <div class="modal-img-wrap" id="modalImgWrap">
       <div class="modal-img-emoji" id="modalImgEmoji"></div>
-      <img id="modalImg" src="" alt="" onerror="this.style.display='none'" style="display:none" />
+      <div class="modal-gallery">
+        <img class="modal-img" id="modalImg" alt="" onerror="this.style.display='none'" style="display:none" />
+        <div class="gallery-nav" id="galleryNav" style="display:none">
+          <button class="gallery-btn" id="galleryPrev" onclick="galleryNav(-1)">‹</button>
+          <span class="gallery-dots" id="galleryDots"></span>
+          <button class="gallery-btn" id="galleryNext" onclick="galleryNav(1)">›</button>
+        </div>
+      </div>
       <button class="modal-close" onclick="closeModalBtn()">✕</button>
     </div>
     <div class="modal-body">
@@ -1296,9 +1311,10 @@ async function loadBirdPhoto(rank, latinName) {
       body: JSON.stringify({ latinName })
     });
     const data = await res.json();
-    if (data.url) {
+    const url = data.urls?.[0] || data.url;
+    if (url) {
       const img = document.getElementById(`photo-${rank}`);
-      if (img) img.src = data.url;
+      if (img) img.src = url;
     }
   } catch {}
 }
@@ -1415,6 +1431,48 @@ function speakCard(event, rank) {
   speakWithElevenLabs(bird.name + '. ' + bird.desc, bird.name, btn, '📖 Czytaj');
 }
 
+// ===== GALLERY =====
+let galleryPhotos = [];
+let galleryIndex = 0;
+
+function galleryNav(dir) {
+  galleryIndex = (galleryIndex + dir + galleryPhotos.length) % galleryPhotos.length;
+  updateGallery();
+}
+
+function updateGallery() {
+  const img = document.getElementById('modalImg');
+  if (img && galleryPhotos[galleryIndex]) {
+    img.src = galleryPhotos[galleryIndex];
+  }
+  const dots = document.getElementById('galleryDots');
+  if (dots) {
+    dots.innerHTML = galleryPhotos.map((_, i) =>
+      `<div class="gallery-dot ${i === galleryIndex ? 'active' : ''}"></div>`
+    ).join('');
+  }
+}
+
+async function loadModalPhotos(latinName) {
+  const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-photo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ latinName })
+    });
+    const data = await res.json();
+    galleryPhotos = data.urls || [];
+    galleryIndex = 0;
+    if (galleryPhotos.length > 0) {
+      updateGallery();
+      const nav = document.getElementById('galleryNav');
+      if (nav) nav.style.display = galleryPhotos.length > 1 ? 'flex' : 'none';
+    }
+  } catch {}
+}
+
 // ===== MODAL =====
 function openModal(rank) {
   const bird = birds.find(b => b.rank === rank);
@@ -1433,18 +1491,13 @@ function openModal(rank) {
   modalImg.onload  = () => { modalImg.style.display='block'; modalEmoji.style.display='none'; };
   modalImg.onerror = () => { modalImg.style.display='none'; modalEmoji.style.display='flex'; };
   modalImg.alt = bird.name;
-  // Load photo via Edge Function
-  (async () => {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-photo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ latinName: bird.latin })
-      });
-      const data = await res.json();
-      if (data.url) { modalImg.src = data.url; }
-    } catch {}
-  })();
+  // Reset gallery
+  galleryPhotos = [];
+  galleryIndex = 0;
+  const gNav = document.getElementById('galleryNav');
+  if (gNav) gNav.style.display = 'none';
+  // Load photos via Edge Function
+  loadModalPhotos(bird.latin);
 
   // Text
   document.getElementById('modalTitle').textContent = bird.name;
