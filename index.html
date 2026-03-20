@@ -796,7 +796,7 @@
       <!-- Action buttons -->
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
-        <button class="btn btn-tts" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
+        <div id="modal-audio-player" style="display:none; margin-top:8px"></div>
       </div>
     </div>
   </div>
@@ -1484,7 +1484,7 @@ function openModal(rank) {
 
   // Reset audience desc
   document.getElementById('modal-desc-text').textContent = '';
-  document.getElementById('modal-desc-speak').style.display = 'none';
+  const ap = document.getElementById('modal-audio-player'); if(ap) { ap.style.display='none'; ap.innerHTML=''; }
   const ffEl = document.getElementById('modal-fun-fact');
   if (ffEl) ffEl.style.display = 'none';
   document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach(t => t.classList.remove('active'));
@@ -1611,7 +1611,7 @@ async function loadAudienceDesc(event, rank, audience) {
   if (audienceDescCache[cacheKey]) {
     textEl.textContent = audienceDescCache[cacheKey];
     currentAudienceDesc[rank].text = audienceDescCache[cacheKey];
-    speakBtn.style.display = 'inline-block';
+    if (audioPlayer) audioPlayer.style.display = 'block';
     return;
   }
 
@@ -1631,7 +1631,7 @@ async function loadAudienceDesc(event, rank, audience) {
     audienceDescCache[cacheKey] = text;
     currentAudienceDesc[rank] = { audience, text };
     textEl.textContent = text;
-    speakBtn.style.display = 'inline-block';
+    if (audioPlayer) audioPlayer.style.display = 'block';
   } catch {
     textEl.textContent = 'Nie udało się wczytać opisu.';
   }
@@ -1646,14 +1646,14 @@ async function loadModalAudienceDesc(audience) {
   });
 
   const textEl = document.getElementById('modal-desc-text');
-  const speakBtn = document.getElementById('modal-desc-speak');
+  const audioPlayer = document.getElementById('modal-audio-player');
   const cacheKey = `${activeBird.rank}-${audience}`;
 
   if (audienceDescCache[cacheKey]) {
     const cached = audienceDescCache[cacheKey];
     textEl.textContent = cached.text;
     modalCurrentAudience = { audience, text: cached.text };
-    speakBtn.style.display = 'inline-block';
+    if (audioPlayer) audioPlayer.style.display = 'block';
     const funFactEl = document.getElementById('modal-fun-fact');
     const funFactTextEl = document.getElementById('modal-fun-fact-text');
     if (cached.fun_fact && funFactEl && funFactTextEl) {
@@ -1682,7 +1682,7 @@ async function loadModalAudienceDesc(audience) {
     audienceDescCache[cacheKey] = { text, fun_fact: data.fun_fact || null };
     modalCurrentAudience = { audience, text };
     textEl.textContent = text;
-    speakBtn.style.display = 'inline-block';
+    if (audioPlayer) audioPlayer.style.display = 'block';
     // Show fun fact if present
     const funFactEl = document.getElementById('modal-fun-fact');
     const funFactTextEl = document.getElementById('modal-fun-fact-text');
@@ -1699,26 +1699,23 @@ async function loadModalAudienceDesc(audience) {
 
 async function speakModalAudienceDesc() {
   if (!activeBird || !modalCurrentAudience.text) return;
-  const btn = document.getElementById('modal-desc-speak');
+  const player = document.getElementById('modal-audio-player');
   const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
   const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
 
   const cacheKey = `${activeBird.rank}-${modalCurrentAudience.audience}`;
 
-  // Unlock audio context synchronously on user gesture — Chrome requires this
-  _sharedAudio.play().catch(() => {});
-
-  // If cached — swap src and play
+  // If cached — inject native audio player
   if (audienceAudioCache[cacheKey]) {
-    _sharedAudio.pause();
-    _sharedAudio.src = audienceAudioCache[cacheKey];
-    _sharedAudio.load();
-    _sharedAudio.play().catch(e => console.warn('play cached:', e));
+    if (player) {
+      player.innerHTML = `<audio controls src="${audienceAudioCache[cacheKey]}" style="width:100%;margin-top:4px"></audio>`;
+      player.style.display = 'block';
+    }
     return;
   }
 
-  btn.textContent = '⏳';
-  btn.disabled = true;
+  if (player) player.innerHTML = '<div style="color:#888;font-size:0.85rem;margin-top:4px">⏳ Generuję audio...</div>';
+
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
       method: 'POST',
@@ -1728,13 +1725,14 @@ async function speakModalAudienceDesc() {
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
-    _sharedAudio.pause();
-    _sharedAudio.src = audioUrl;
-    _sharedAudio.load();
-    _sharedAudio.play().catch(e => console.warn('play fetched:', e));
-  } catch(e) { console.warn('TTS fetch error:', e); }
-  btn.disabled = false;
-  btn.textContent = '🔊 Czytaj opis';
+    if (player) {
+      player.innerHTML = `<audio controls src="${audioUrl}" style="width:100%;margin-top:4px"></audio>`;
+      player.style.display = 'block';
+    }
+  } catch(e) {
+    console.warn('TTS error:', e);
+    if (player) player.innerHTML = '';
+  }
 }
 
 // Shared persistent audio element — avoids autoplay policy issues
