@@ -6,7 +6,7 @@
   <title>Atlas Polskich Ptaków 🐦</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet" />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -724,13 +724,13 @@
 
       <!-- Audience tabs — large, prominent -->
       <div class="modal-audience-tabs" id="modal-aud-tabs">
-        <button class="modal-aud-tab active" onclick="loadModalAudienceDesc('przedszkolak')">🧒 Maluch</button>
+        <button class="modal-aud-tab" onclick="loadModalAudienceDesc('przedszkolak')">🧒 Maluch</button>
         <button class="modal-aud-tab" onclick="loadModalAudienceDesc('szkolny')">📚 Szkoła</button>
         <button class="modal-aud-tab" onclick="loadModalAudienceDesc('dorosly')">🔬 Dorosły</button>
       </div>
 
       <!-- Generated description -->
-      <div class="modal-gen-desc" id="modal-desc-text">Wybierz grupę wiekową powyżej ▲</div>
+      <div class="modal-gen-desc" id="modal-desc-text"></div>
       <div class="fun-fact" id="modal-fun-fact" style="display:none">
         <div class="fun-fact-title">💡 Czy wiesz, że...</div>
         <div class="fun-fact-text" id="modal-fun-fact-text"></div>
@@ -1120,6 +1120,42 @@ const birds = [
     funFact: "Dzwoniec tak bardzo lubi słoneczniki, że potrafi zjeść kilkadziesiąt nasion w ciągu minuty. Jest mistrzem łuskania!",
     img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Chloris_chloris_male_2_%28Marek_Szczepanek%29.jpg/480px-Chloris_chloris_male_2_%28Marek_Szczepanek%29.jpg",
     xenoQuery: "Chloris+chloris+cnt:Poland"
+  },
+  {
+    rank: 31,
+    name: "Dudek",
+    latin: "Upupa epops",
+    emoji: "🦚",
+    habitat: "las",
+    teaser: "Ptak z pięknym czubem na głowie!",
+    desc: "Dudek ma efektowny pomarańczowy czub z czarnymi końcówkami, który rozkłada jak wachlarz. Jego charakterystyczne wołanie to \"hu-pu-pu\", od którego pochodzi jego łacińska nazwa.",
+    funFact: "Dudek gniazduje w dziuplach i buduje gniazdo, które specjalnie śmierdzi, żeby odstraszać drapieżniki!",
+    img: "",
+    xenoQuery: "Upupa+epops+cnt:Poland"
+  },
+  {
+    rank: 32,
+    name: "Kruk",
+    latin: "Corvus corax",
+    emoji: "🐦‍⬛",
+    habitat: "las",
+    teaser: "Największy ptak krukowaty w Polsce.",
+    desc: "Kruk to największy przedstawiciel rodziny krukowatych. Ma błyszczące, całkowicie czarne upierzenie i potężny dziób. Jest niezwykle inteligentny — potrafi używać narzędzi i rozwiązywać złożone zagadki.",
+    funFact: "Kruki tworzą pary na całe życie i pamiętają twarze ludzi przez wiele lat!",
+    img: "",
+    xenoQuery: "Corvus+corax+cnt:Poland"
+  },
+  {
+    rank: 33,
+    name: "Orzeł bielik",
+    latin: "Haliaeetus albicilla",
+    emoji: "🦅",
+    habitat: "woda",
+    teaser: "Największy orzeł w Polsce — ptak narodowy!",
+    desc: "Bielik to największy orzeł Europy i symbol Polski. Ma charakterystyczny biały ogon i żółty dziób. Poluje głównie na ryby, które chwyta bezpośrednio z wody ostrymi szponami.",
+    funFact: "Bielik ma rozpiętość skrzydeł nawet 2,5 metra — mniej więcej tyle co wzrost dorosłego człowieka!",
+    img: "",
+    xenoQuery: "Haliaeetus+albicilla+cnt:Poland"
   }
 ];
 
@@ -1426,11 +1462,11 @@ function openModal(rank) {
   document.getElementById('modalSoundBtn').classList.remove('playing');
 
   // Reset audience desc
-  document.getElementById('modal-desc-text').textContent = 'Wybierz grupę wiekową powyżej ▲';
+  document.getElementById('modal-desc-text').textContent = '';
   document.getElementById('modal-desc-speak').style.display = 'none';
   const ffEl = document.getElementById('modal-fun-fact');
   if (ffEl) ffEl.style.display = 'none';
-  document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach(t => t.classList.remove('active'));
   modalCurrentAudience = { audience: null, text: null };
 
   document.getElementById('modalOverlay').classList.add('open');
