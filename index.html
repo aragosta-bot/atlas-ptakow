@@ -1282,35 +1282,53 @@ async function playSound(event, rank) {
 }
 
 // ===== TTS (card) =====
+const audioCache = {};
+let currentAudio = null;
+
+async function speakWithElevenLabs(text, birdName, btn, labelDefault) {
+  if (currentAudio && !currentAudio.paused) {
+    currentAudio.pause();
+    currentAudio = null;
+    document.querySelectorAll('.btn-tts, .btn-tts-modal').forEach(b => b.innerHTML = labelDefault || '📖 Czytaj');
+    return;
+  }
+
+  const cacheKey = birdName;
+  btn.innerHTML = '⏳ Ładuję…';
+
+  try {
+    let url = audioCache[cacheKey];
+    if (!url) {
+      const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+      const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+        body: JSON.stringify({ birdName, text })
+      });
+      const data = await res.json();
+      if (!data.url) throw new Error('Brak URL');
+      url = data.url;
+      audioCache[cacheKey] = url;
+    }
+
+    currentAudio = new Audio(url);
+    btn.innerHTML = '⏹️ Zatrzymaj';
+    currentAudio.play();
+    currentAudio.onended = () => { btn.innerHTML = labelDefault || '📖 Czytaj'; currentAudio = null; };
+    currentAudio.onerror = () => { btn.innerHTML = labelDefault || '📖 Czytaj'; currentAudio = null; };
+  } catch (e) {
+    btn.innerHTML = labelDefault || '📖 Czytaj';
+    alert('Błąd odtwarzania. Spróbuj ponownie.');
+  }
+}
+
 function speakCard(event, rank) {
   event.stopPropagation();
   const bird = birds.find(b => b.rank === rank);
   if (!bird) return;
   const btn = document.getElementById(`tts-${rank}`);
-
-  if (isSpeaking) {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    document.querySelectorAll('.btn-tts').forEach(b => { b.innerHTML = '📖 Czytaj'; });
-    return;
-  }
-
-  const utter = new SpeechSynthesisUtterance(bird.name + '. ' + bird.desc);
-  utter.lang = 'pl-PL';
-  utter.rate = 0.9;
-  isSpeaking = true;
-  btn.innerHTML = '⏹️ Zatrzymaj';
-
-  utter.onend = () => {
-    isSpeaking = false;
-    btn.innerHTML = '📖 Czytaj';
-  };
-  utter.onerror = () => {
-    isSpeaking = false;
-    btn.innerHTML = '📖 Czytaj';
-  };
-
-  window.speechSynthesis.speak(utter);
+  speakWithElevenLabs(bird.name + '. ' + bird.desc, bird.name, btn, '📖 Czytaj');
 }
 
 // ===== MODAL =====
@@ -1437,25 +1455,8 @@ async function playModalSound() {
 function speakModal() {
   if (!activeBird) return;
   const btn = document.getElementById('modalTtsBtn');
-
-  if (isSpeaking) {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    btn.innerHTML = '📖 Przeczytaj głośno';
-    return;
-  }
-
   const text = `${activeBird.name}. ${activeBird.desc}. Czy wiesz że: ${activeBird.funFact}`;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'pl-PL';
-  utter.rate = 0.88;
-  isSpeaking = true;
-  btn.innerHTML = '⏹️ Zatrzymaj';
-
-  utter.onend = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
-  utter.onerror = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
-
-  window.speechSynthesis.speak(utter);
+  speakWithElevenLabs(text, activeBird.name + '-modal', btn, '📖 Przeczytaj głośno');
 }
 
 // ===== CHILD DESCRIPTIONS =====
