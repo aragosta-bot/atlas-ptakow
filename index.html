@@ -1190,12 +1190,13 @@ function renderCards() {
       <div class="card-img-wrap">
         <div class="card-emoji-fallback" id="emoji-${bird.rank}">${bird.emoji}</div>
         <img
-          src="${bird.img}"
+          id="photo-${bird.rank}"
+          src=""
           alt="${bird.name}"
           loading="lazy"
+          style="display:none"
           onload="this.style.display='block'; document.getElementById('emoji-${bird.rank}').style.display='none';"
           onerror="this.style.display='none';"
-          style="display:none"
         />
         <span class="habitat-badge ${hc.colorClass}">${hc.label}</span>
         <span class="rank-badge">⭐ #${bird.rank}</span>
@@ -1218,6 +1219,25 @@ function renderCards() {
   }, { threshold: 0.05 });
 
   grid.querySelectorAll('.card').forEach(c => observer.observe(c));
+
+  // Load photos from iNaturalist via Edge Function
+  list.forEach(bird => loadBirdPhoto(bird.rank, bird.latin));
+}
+
+// ===== PHOTO LOADER =====
+async function loadBirdPhoto(rank, latinName) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-photo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ latinName })
+    });
+    const data = await res.json();
+    if (data.url) {
+      const img = document.getElementById(`photo-${rank}`);
+      if (img) img.src = data.url;
+    }
+  } catch {}
 }
 
 // ===== SOUND SYSTEM =====
@@ -1345,10 +1365,22 @@ function openModal(rank) {
   modalEmoji.textContent = bird.emoji;
   modalEmoji.style.display = 'flex';
   modalImg.style.display = 'none';
-  modalImg.src = bird.img;
+  modalImg.src = '';
   modalImg.onload  = () => { modalImg.style.display='block'; modalEmoji.style.display='none'; };
   modalImg.onerror = () => { modalImg.style.display='none'; modalEmoji.style.display='flex'; };
   modalImg.alt = bird.name;
+  // Load photo via Edge Function
+  (async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-photo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ latinName: bird.latin })
+      });
+      const data = await res.json();
+      if (data.url) { modalImg.src = data.url; }
+    } catch {}
+  })();
 
   // Text
   document.getElementById('modalName').textContent = bird.name;
