@@ -8,7 +8,6 @@ const cors = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
-
   try {
     const { birdName, text, audience } = await req.json()
     const aud = audience || 'dorosly'
@@ -18,13 +17,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Check cache
+    // Check cache in dedicated audio table
     const { data: cached } = await supabase
-      .from('bird_content')
+      .from('bird_audio')
       .select('audio_url')
       .eq('bird_name', birdName)
-      .eq('audience', `audio-${aud}`)
-      .not('audio_url', 'is', null)
+      .eq('audience', aud)
       .maybeSingle()
 
     if (cached?.audio_url) {
@@ -49,16 +47,16 @@ serve(async (req) => {
 
     if (!response.ok) throw new Error(`ElevenLabs: ${response.status}`)
 
-    // Return audio directly as stream — no base64 bloat
-    const audioBuffer = await response.arrayBuffer()
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+    const buf = await response.arrayBuffer()
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)))
     const dataUrl = `data:audio/mpeg;base64,${base64}`
 
-    // Cache
-    await supabase.from('bird_content').upsert(
-      { bird_name: birdName, latin_name: birdName, audience: `audio-${aud}`, audio_url: dataUrl, description: '' },
-      { onConflict: 'bird_name,audience' }
-    )
+    // Save to dedicated audio cache table
+    const { error: insertError } = await supabase
+      .from('bird_audio')
+      .upsert({ bird_name: birdName, audience: aud, audio_url: dataUrl }, { onConflict: 'bird_name,audience' })
+    
+    if (insertError) console.error('Cache insert error:', insertError.message)
 
     return new Response(JSON.stringify({ url: dataUrl, cached: false }), {
       headers: { ...cors, 'Content-Type': 'application/json' }
