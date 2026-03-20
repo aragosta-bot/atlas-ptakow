@@ -1283,7 +1283,6 @@ async function playSound(event, rank) {
 
 // ===== TTS (card) =====
 const audioCache = {};
-let currentAudio = null;
 
 async function speakWithElevenLabs(text, birdName, btn, labelDefault) {
   if (currentAudio && !currentAudio.paused) {
