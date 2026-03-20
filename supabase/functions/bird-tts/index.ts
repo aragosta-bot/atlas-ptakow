@@ -17,28 +17,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const fileName = `${birdName.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')}.mp3`
-
     // Check cache
-    const { data: existing } = await supabase.storage.from('bird-audio').list('', { search: fileName })
+    const { data: cached } = await supabase
+      .from('bird_descriptions')
+      .select('audio_url')
+      .eq('bird_name', birdName)
+      .not('audio_url', 'is', null)
+      .maybeSingle()
 
-    if (existing && existing.length > 0) {
-      const { data: { publicUrl } } = supabase.storage.from('bird-audio').getPublicUrl(fileName)
-      return new Response(JSON.stringify({ url: publicUrl, cached: true }), {
+    if (cached?.audio_url) {
+      return new Response(JSON.stringify({ url: cached.audio_url, cached: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
     // Generate with ElevenLabs
     const elevenKey = Deno.env.get('ELEVENLABS_API_KEY')!
-    const voiceId = 'd4Z5Fvjohw3zxGpV8XUV' // Jessica - Playful, Bright, Warm
+    const voiceId = 'd4Z5Fvjohw3zxGpV8XUV' // Maria - Quiet and Gentle
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
-      headers: {
-        'xi-api-key': elevenKey,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'xi-api-key': elevenKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         text,
         model_id: 'eleven_multilingual_v2',
@@ -46,27 +45,24 @@ serve(async (req) => {
       })
     })
 
-    if (!response.ok) {
-      throw new Error(`ElevenLabs error: ${response.status}`)
-    }
+    if (!response.ok) throw new Error(`ElevenLabs error: ${response.status}`)
 
     const audioBuffer = await response.arrayBuffer()
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)))
+    const dataUrl = `data:audio/mpeg;base64,${base64}`
 
-    // Create bucket if not exists, then upload
-    await supabase.storage.createBucket('bird-audio', { public: true }).catch(() => {})
+    // Cache as data URL in bird_descriptions table
+    await supabase.from('bird_descriptions')
+      .upsert(
+        { bird_name: birdName, audio_url: dataUrl, description_child: '' },
+        { onConflict: 'bird_name' }
+      )
 
-    await supabase.storage.from('bird-audio').upload(fileName, audioBuffer, {
-      contentType: 'audio/mpeg',
-      upsert: true
-    })
-
-    const { data: { publicUrl } } = supabase.storage.from('bird-audio').getPublicUrl(fileName)
-
-    return new Response(JSON.stringify({ url: publicUrl, cached: false }), {
+    return new Response(JSON.stringify({ url: dataUrl, cached: false }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
