@@ -35,7 +35,7 @@ serve(async (req) => {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${openaiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5.4-mini-2026-03-17',
       instructions: 'Jesteś pomocnym asystentem który pisze opisy ptaków dla dzieci w wieku 4-7 lat. Używasz bardzo prostych słów, krótkich zdań, pozytywnego tonu. Maks 3 zdania. Możesz dodać jeden emoji na końcu.',
       input: `Przepisz ten opis ptaka "${birdName}" dla dziecka w wieku 4-7 lat, bardzo prosto i radośnie:\n${description}`,
       max_output_tokens: 150,
