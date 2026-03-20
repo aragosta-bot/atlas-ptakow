@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlas Polskich Ptaków 🐦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:   #4caf50;
+      --green-bg:#e8f5e9;
+      --orange:  #ff9800;
+      --orange-bg:#fff3e0;
+      --blue:    #2196f3;
+      --blue-bg: #e3f2fd;
+      --yellow:  #ffc107;
+      --yellow-bg:#fffde7;
+      --purple:  #9c27b0;
+      --purple-bg:#f3e5f5;
+      --text:    #2d3436;
+      --muted:   #636e72;
+      --radius:  24px;
+      --shadow:  0 4px 20px rgba(0,0,0,0.10);
+      --shadow-hover: 0 12px 40px rgba(0,0,0,0.18);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, #f0f8ff 0%, #fef9e7 50%, #f0fff4 100%);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #74b9ff 0%, #a29bfe 40%, #55efc4 100%);
+      padding: 60px 20px 80px;
+      text-align: center;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Flying birds in hero */
+    .bird-fly {
+      position: absolute;
+      font-size: 2rem;
+      animation: fly linear infinite;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    @keyframes fly {
+      0%   { transform: translateX(-100px) translateY(0px); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.7; }
+      100% { transform: translateX(calc(100vw + 100px)) translateY(-30px); opacity: 0; }
+    }
+
+    .hero-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      position: relative;
+      z-index: 2;
+      animation: slideDown 0.8s ease;
+      line-height: 1.1;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-40px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      color: rgba(255,255,255,0.92);
+      margin: 16px 0 36px;
+      font-weight: 600;
+      position: relative;
+      z-index: 2;
+      animation: slideDown 0.8s ease 0.2s both;
+    }
+    .search-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 560px;
+      animation: slideDown 0.8s ease 0.4s both;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 18px 60px 18px 24px;
+      border-radius: 50px;
+      border: none;
+      font-size: 1.1rem;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      outline: none;
+      transition: box-shadow 0.3s;
+    }
+    .search-wrap input:focus {
+      box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    }
+    .search-wrap .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.4rem;
+      pointer-events: none;
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      background: #fff;
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.07);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .habitat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .chip {
+      padding: 10px 18px;
+      border-radius: 50px;
+      border: 2.5px solid transparent;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f5f5f5;
+      color: var(--text);
+      min-height: 44px;
+    }
+    .chip:hover { transform: scale(1.05); }
+    .chip.active {
+      border-color: currentColor;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    .chip-all.active    { color: #333; background: #eee; }
+    .chip-las.active    { color: var(--green);  background: var(--green-bg); }
+    .chip-miasto.active { color: var(--orange); background: var(--orange-bg); }
+    .chip-woda.active   { color: var(--blue);   background: var(--blue-bg); }
+    .chip-pole.active   { color: #b7910a;       background: var(--yellow-bg); }
+    .chip-gory.active   { color: var(--purple); background: var(--purple-bg); }
+
+    .sort-select {
+      padding: 10px 16px;
+      border-radius: 50px;
+      border: 2.5px solid #e0e0e0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      min-height: 44px;
+      transition: border-color 0.2s;
+    }
+    .sort-select:focus { border-color: var(--blue); }
+
+    /* ===== CARDS GRID ===== */
+    .birds-section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .results-count {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .birds-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    @media(min-width: 640px)  { .birds-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media(min-width: 1024px) { .birds-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    /* ===== CARD ===== */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateY(30px);
+      /* revealed by IntersectionObserver */
+    }
+    .card.visible {
+      animation: cardIn 0.55s ease forwards;
+    }
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card:hover {
+      transform: translateY(-8px) !important;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+      background: #f0f4f8;
+    }
+    @media(min-width: 640px) { .card-img-wrap { height: 240px; } }
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      display: block;
+    }
+    .card:hover .card-img-wrap img { transform: scale(1.06); }
+    .card-emoji-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: linear-gradient(135deg, #f0f8ff, #e8f5e9);
+    }
+
+    .habitat-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 5px 12px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      backdrop-filter: blur(4px);
+    }
+    .habitat-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.8);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; transform: scale(1); } 50% { opacity:0.5; transform: scale(1.3); } }
+
+    .badge-las    { background: rgba(76,175,80,0.85); }
+    .badge-miasto { background: rgba(255,152,0,0.85); }
+    .badge-woda   { background: rgba(33,150,243,0.85); }
+    .badge-pole   { background: rgba(255,193,7,0.85); color: #333; }
+    .badge-gory   { background: rgba(156,39,176,0.85); }
+
+    .rank-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text);
+      backdrop-filter: blur(4px);
+    }
+
+    .card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.25rem;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .card-latin {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--muted);
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+      flex: 1;
+      /* clamp to 2 lines */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-height: 44px;
+      border: none;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 0 10px;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-sound {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+    .btn-sound:hover { background: var(--blue); color: #fff; }
+    .btn-sound.playing {
+      background: var(--blue);
+      color: #fff;
+      animation: btnPulse 1.2s ease infinite;
+    }
+    @keyframes btnPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(33,150,243,0.4); }
+      50%      { box-shadow: 0 0 0 8px rgba(33,150,243,0); }
+    }
+    .btn-tts {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+    .btn-tts:hover { background: var(--green); color: #fff; }
+    .btn-more {
+      background: var(--yellow-bg);
+      color: #9a6f00;
+    }
+    .btn-more:hover { background: var(--yellow); color: #fff; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      max-width: 680px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+      transform: scale(0.85);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .modal-overlay.open .modal {
+      transform: scale(1);
+    }
+    .modal-img-wrap {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .modal-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .modal-img-emoji {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8rem;
+      background: linear-gradient(135deg, #f0f8ff, #e8f5e9);
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      transition: transform 0.2s, background 0.2s;
+      z-index: 2;
+    }
+    .modal-close:hover { transform: scale(1.1); background: #fff; }
+
+    .modal-body {
+      padding: 28px;
+    }
+    .modal-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .modal-latin {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .modal-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .modal-badge {
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .modal-desc {
+      margin-top: 20px;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .fun-fact {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #fff9c4, #fff3e0);
+      border-left: 5px solid var(--yellow);
+      border-radius: 16px;
+      padding: 16px 20px;
+    }
+    .fun-fact-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: #9a6f00;
+      margin-bottom: 6px;
+    }
+    .fun-fact-text {
+      font-size: 1rem;
+      color: #6d4c00;
+      line-height: 1.6;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .modal-actions .btn {
+      flex: 1;
+      min-width: 140px;
+      min-height: 52px;
+      font-size: 1rem;
+    }
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== EMPTY STATE ===== */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-emoji { font-size: 4rem; margin-bottom: 16px; display: block; }
+    .empty h3 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; margin-bottom: 8px; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    footer strong { color: var(--text); }
+
+    /* ===== SCROLL-TO-TOP ===== */
+    .scroll-top {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(33,150,243,0.4);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 200;
+    }
+    .scroll-top.visible { opacity: 1; pointer-events: all; }
+    .scroll-top:hover { transform: scale(1.1); }
+  </style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <!-- Floating birds - injected by JS -->
+  <div id="flyingBirds"></div>
+
+  <h1 class="hero-title">Atlas Polskich Ptaków 🐦</h1>
+  <p class="hero-subtitle">Poznaj ptaki które żyją w Polsce! 🌿</p>
+
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="🔍 Wpisz nazwę ptaka..." autocomplete="off" />
+    <span class="search-icon">🔍</span>
+  </div>
+</section>
+
+<!-- ===== FILTER BAR ===== -->
+<div class="filter-bar" id="filterBar">
+  <div class="habitat-chips">
+    <button class="chip chip-all active"  data-habitat="all"    onclick="setHabitat('all')">Wszystkie 🌍</button>
+    <button class="chip chip-las"         data-habitat="las"    onclick="setHabitat('las')">Las 🌲</button>
+    <button class="chip chip-miasto"      data-habitat="miasto" onclick="setHabitat('miasto')">Miasto 🏙️</button>
+    <button class="chip chip-woda"        data-habitat="woda"   onclick="setHabitat('woda')">Woda 💧</button>
+    <button class="chip chip-pole"        data-habitat="pole"   onclick="setHabitat('pole')">Pole 🌾</button>
+    <button class="chip chip-gory"        data-habitat="gory"   onclick="setHabitat('gory')">Góry ⛰️</button>
+  </div>
+  <select class="sort-select" id="sortSelect" onchange="renderCards()">
+    <option value="rank-asc">⭐ Popularność ↓</option>
+    <option value="rank-desc">⭐ Popularność ↑</option>
+    <option value="name-asc">🅰️ Nazwa A-Z</option>
+    <option value="name-desc">🅱️ Nazwa Z-A</option>
+  </select>
+</div>
+
+<!-- ===== BIRDS GRID ===== -->
+<section class="birds-section">
+  <p class="results-count" id="resultsCount"></p>
+  <div class="birds-grid" id="birdsGrid"></div>
+</section>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-img-wrap" id="modalImgWrap">
+      <div class="modal-img-emoji" id="modalImgEmoji"></div>
+      <img id="modalImg" src="" alt="" onerror="this.style.display='none'" style="display:none" />
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalHabitatBadge" class="modal-badges"></div>
+      <h2 class="modal-name" id="modalName"></h2>
+      <p class="modal-latin" id="modalLatin"></p>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="fun-fact" id="modalFunFact">
+        <div class="fun-fact-title">🤔 Czy wiesz że...?</div>
+        <div class="fun-fact-text" id="modalFunFactText"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Odtwórz głos</button>
+        <button class="btn btn-tts"   id="modalTtsBtn"   onclick="speakModal()">📖 Przeczytaj głośno</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</button>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>🐦 <strong>Atlas Polskich Ptaków</strong> — stworzone z ❤️ dla dzieci</p>
+  <p style="margin-top:8px">Dźwięki ptaków dzięki <a href="https://xeno-canto.org" target="_blank" style="color:var(--blue)">Xeno-canto.org</a> 🎵 &nbsp;|&nbsp; Zdjęcia: Wikimedia Commons 📷</p>
+</footer>
+
+<script>
+// ===== BIRD DATA =====
+const birds = [
+  {
+    rank: 1,
+    name: "Wróbel",
+    latin: "Passer domesticus",
+    emoji: "🐦",
+    habitat: "miasto",
+    teaser: "Najpopularniejszy ptak w Polsce! Mieszka blisko ludzi.",
+    desc: "Wróbel to mały, brązowy ptaszek, który mieszka wszędzie tam, gdzie są ludzie. Uwielbia chować się pod dachami domów i budować tam swoje gniazda. Śpiewa głośno i wesoło przez cały rok!",
+    funFact: "Wróbel bierze kąpiel w piasku, żeby wyczyścić swoje piórka. Wygląda to bardzo śmiesznie!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Passer_domesticus_male_%2815%29.jpg/480px-Passer_domesticus_male_%2815%29.jpg",
+    xenoQuery: "Passer+domesticus+cnt:Poland"
+  },
+  {
+    rank: 2,
+    name: "Sikora bogatka",
+    latin: "Parus major",
+    emoji: "🟡",
+    habitat: "las",
+    teaser: "Żółty brzuszek i czarna czapeczka — nie pomylisz jej z nikim!",
+    desc: "Sikora bogatka ma piękne żółte brzuszko i czarną czapeczkę na głowie. Mieszka w lasach i ogrodach. Jest bardzo sprytna — potrafi otwierać aluminiowe nakrętki na butelkach mleka, żeby się dostać do środka!",
+    funFact: "Sikora bogatka potrafi zaśpiewać ponad 40 różnych melodii. To jak mieć własny radio!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Parus_major_Luc_Viatour.jpg/480px-Parus_major_Luc_Viatour.jpg",
+    xenoQuery: "Parus+major+cnt:Poland"
+  },
+  {
+    rank: 3,
+    name: "Rudzik",
+    latin: "Erithacus rubecula",
+    emoji: "🔴",
+    habitat: "las",
+    teaser: "Ptak z pomarańczową piersią. Śpiewa nawet zimą!",
+    desc: "Rudzik ma piękną pomarańczową pierś i wielkie czarne oczka. Jest jednym z niewielu ptaków, które śpiewają zimą. Lubi chodzić po ziemi i szukać robaków. Często odwiedza ogrody i nie boi się ludzi.",
+    funFact: "Rudzik jest bardzo odważny! Broni swojego terenu nawet przed dużo większymi ptakami.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Erithacus_rubecula_with_cocked_head.jpg/480px-Erithacus_rubecula_with_cocked_head.jpg",
+    xenoQuery: "Erithacus+rubecula+cnt:Poland"
+  },
+  {
+    rank: 4,
+    name: "Kos",
+    latin: "Turdus merula",
+    emoji: "⚫",
+    habitat: "miasto",
+    teaser: "Czarny ptak z żółtym dziobem i cudnym śpiewem.",
+    desc: "Kos to czarny ptak z pomarańczowo-żółtym dziobem. Samice są brązowe. Kos śpiewa jedne z najpiękniejszych melodii wśród polskich ptaków. Lubi szukać dżdżownic na trawnikach po deszczu.",
+    funFact: "Kos bardzo szybko uczy się nowych melodii i często naśladuje inne ptaki. Słyszysz ciekawy śpiew? To może być kos!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Common_Blackbird.jpg/480px-Common_Blackbird.jpg",
+    xenoQuery: "Turdus+merula+cnt:Poland"
+  },
+  {
+    rank: 5,
+    name: "Szpak",
+    latin: "Sturnus vulgaris",
+    emoji: "🌟",
+    habitat: "miasto",
+    teaser: "Błyszczące pióra i świetny naśladowca dźwięków!",
+    desc: "Szpak ma czarne pióra z zielonymi i fioletowymi błyskami. Jest mistrzem naśladowania — może udawać głosy innych ptaków, a nawet telefon czy samochód! Szpaki latają w ogromnych stadach zwanych murmuration.",
+    funFact: "Stado szpaków może liczyć milion ptaków! Razem tworzą niesamowite wzory na niebie.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Starling_at_Alkborough_Flats_-_geograph.org.uk_-_1007783.jpg/480px-Starling_at_Alkborough_Flats_-_geograph.org.uk_-_1007783.jpg",
+    xenoQuery: "Sturnus+vulgaris+cnt:Poland"
+  },
+  {
+    rank: 6,
+    name: "Jaskółka dymówka",
+    latin: "Hirundo rustica",
+    emoji: "💙",
+    habitat: "miasto",
+    teaser: "Mistrz lotu! Przylatuje z Afryki każdej wiosny.",
+    desc: "Jaskółka dymówka ma niebiesko-czarne skrzydła i długi ogon w kształcie widelca. Co roku wiosną przylatuje do nas aż z Afryki! Lata bardzo szybko i łapie owady w powietrzu. Buduje gniazdo z gliny pod dachami.",
+    funFact: "Jaskółka może spać podczas lotu! Robi to szybując wysoko na niebie.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Hirundo_rustica_-Waterloo_Bridge%2C_London%2C_England-8.jpg/480px-Hirundo_rustica_-Waterloo_Bridge%2C_London%2C_England-8.jpg",
+    xenoQuery: "Hirundo+rustica+cnt:Poland"
+  },
+  {
+    rank: 7,
+    name: "Bocian biały",
+    latin: "Ciconia ciconia",
+    emoji: "🦢",
+    habitat: "pole",
+    teaser: "Symbol Polski! Przynosi szczęście do domu.",
+    desc: "Bocian biały to jeden z symboli Polski. Ma białe pióra, czerwony dziób i czerwone nogi. Bocian buduje ogromne gniazda na słupach i dachach. Każdego roku wraca do tego samego gniazda! Lata do Afryki na zimę.",
+    funFact: "Gniazdo bociana może ważyć nawet 200 kilogramów — tyle co dorosły niedźwiedź!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Ciconia_ciconia_-Mecklenburg-Vorpommern%2C_Germany-8_%28aka%29.jpg/480px-Ciconia_ciconia_-Mecklenburg-Vorpommern%2C_Germany-8_%28aka%29.jpg",
+    xenoQuery: "Ciconia+ciconia+cnt:Poland"
+  },
+  {
+    rank: 8,
+    name: "Kukułka",
+    latin: "Cuculus canorus",
+    emoji: "🕐",
+    habitat: "las",
+    teaser: "Ku-ku! Jej głos to znak, że przyszła wiosna.",
+    desc: "Kukułka słynie z głosu 'ku-ku', który słyszymy wiosną w lesie. Ma szare pióra z pasiastym brzuchem. Kukułka jest leniwa — nie buduje własnego gniazda! Podkłada jajka do gniazd innych ptaków.",
+    funFact: "Kukułka jest jak aktorka. Jej piskle rośnie tak szybko, że wyrzuca z gniazda jajka prawdziwych rodziców!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Cuculus_canorus_vogelartinfo.jpg/480px-Cuculus_canorus_vogelartinfo.jpg",
+    xenoQuery: "Cuculus+canorus+cnt:Poland"
+  },
+  {
+    rank: 9,
+    name: "Dzięcioł duży",
+    latin: "Dendrocopos major",
+    emoji: "🔴",
+    habitat: "las",
+    teaser: "Puk-puk-puk! Słyszysz w lesie? To dzięcioł!",
+    desc: "Dzięcioł duży stuka mocno dziobem w drewno, żeby znaleźć owady ukryte pod korą. Ma czarno-białe pióra i czerwoną czapeczkę. Może stukać w drzewo nawet 20 razy na sekundę! Ma specjalny język jak haczyk do wyciągania robaków.",
+    funFact: "Dzięcioł ma miękką poduszkę kostną w głowie, która chroni go przed bólem głowy od stukania!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Dendrocopos_major_-_Pica_Pau_Malhado.jpg/480px-Dendrocopos_major_-_Pica_Pau_Malhado.jpg",
+    xenoQuery: "Dendrocopos+major+cnt:Poland"
+  },
+  {
+    rank: 10,
+    name: "Zięba",
+    latin: "Fringilla coelebs",
+    emoji: "🍂",
+    habitat: "las",
+    teaser: "Kolorowy ptak leśny z różową piersią.",
+    desc: "Zięba to jeden z najpospolitszych ptaków leśnych w Polsce. Samiec ma piękną różową pierś i niebiesko-szarą głowę. Zięba żywi się nasionami i owadami. Zimą często przylatuje do ogrodów szukać jedzenia.",
+    funFact: "Zięba zbuduje gniazdo tak starannie, że pokryje je mchem i porostami dla kamuflażu. Prawdziwy architekt!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Fringilla_coelebs_chaffinch_male_edit2.jpg/480px-Fringilla_coelebs_chaffinch_male_edit2.jpg",
+    xenoQuery: "Fringilla+coelebs+cnt:Poland"
+  },
+  {
+    rank: 11,
+    name: "Sowa uszata",
+    latin: "Asio otus",
+    emoji: "🦉",
+    habitat: "las",
+    teaser: "Nocny łowca z puszystymi uszkami na głowie.",
+    desc: "Sowa uszata ma piękne brązowe pióra i dwa pęczki piór na głowie, które wyglądają jak uszka. Jest nocnym myśliwym — w ciemności widzi i słyszy lepiej niż my! Poluje na myszy i inne małe zwierzęta.",
+    funFact: "Sowa może obracać głową o 270 stopni! To dlatego, że jej oczy są nieruchome i musi kręcić szyją.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Asio_otus_-_01.jpg/480px-Asio_otus_-_01.jpg",
+    xenoQuery: "Asio+otus+cnt:Poland"
+  },
+  {
+    rank: 12,
+    name: "Puszczyk",
+    latin: "Strix aluco",
+    emoji: "🌙",
+    habitat: "las",
+    teaser: "Whooo! Puszczyk straszy nocą w starych lasach.",
+    desc: "Puszczyk to nocna sowa, która żyje w starych lasach i parkach. Ma brązowe upierzenie z cętkami, które świetnie go maskuje w dzień. W nocy wydaje głośne 'huuu' i 'kewit'. Poluje na myszy, żaby i małe ptaki.",
+    funFact: "Puszczyk połyka swoje ofiary w całości, a niestrawione kości i sierść zwija w kulki i wypluje. Te kulki to pelety!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Strix_aluco_-_standing_on_log.jpg/480px-Strix_aluco_-_standing_on_log.jpg",
+    xenoQuery: "Strix+aluco+cnt:Poland"
+  },
+  {
+    rank: 13,
+    name: "Jastrząb",
+    latin: "Accipiter gentilis",
+    emoji: "🦅",
+    habitat: "las",
+    teaser: "Szybki drapieżnik leśny. Prawdziwy pilot myśliwski!",
+    desc: "Jastrząb to szybki ptak drapieżny, który poluje w lesie. Ma krótkie, szerokie skrzydła, które pozwalają mu manewrować między drzewami. Poluje na gołębie, zające i inne ptaki. Lata tak szybko, że trudno go zobaczyć!",
+    funFact: "Jastrząb może lecieć z prędkością 80 kilometrów na godzinę w lesie. To szybciej niż samochód na drodze w mieście!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Accipiter_gentilis_EPM.jpg/480px-Accipiter_gentilis_EPM.jpg",
+    xenoQuery: "Accipiter+gentilis+cnt:Poland"
+  },
+  {
+    rank: 14,
+    name: "Myszołów",
+    latin: "Buteo buteo",
+    emoji: "🦆",
+    habitat: "pole",
+    teaser: "Siedzi na słupach i poluje na myszy na polach.",
+    desc: "Myszołów to duży ptak drapieżny, który lubi siedzieć na słupach przy drogach. Szuka myszy i kretów na polach i łąkach. Krąży wysoko na niebie, korzystając z ciepłych prądów powietrza. Ma brązowe pióra i jasny brzuch.",
+    funFact: "Myszołów ma wzrok 8 razy lepszy od człowieka! Z wysokości 100 metrów widzi myszę chowającą się w trawie.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Buteo_buteo_-_Le_Cannet.jpg/480px-Buteo_buteo_-_Le_Cannet.jpg",
+    xenoQuery: "Buteo+buteo+cnt:Poland"
+  },
+  {
+    rank: 15,
+    name: "Bażant",
+    latin: "Phasianus colchicus",
+    emoji: "🌈",
+    habitat: "pole",
+    teaser: "Kolorowy jak tęcza! Żyje na polach i w zaroślach.",
+    desc: "Samiec bażanta to jeden z najpiękniejszych ptaków w Polsce! Ma zielono-niebieską głowę, czerwoną maskę i długi ogon z wzorami. Samice są brązowe i niewidoczne w trawie. Bażant uciekając biegnie, a dopiero potem wzlatuje.",
+    funFact: "Bażant pochodzi pierwotnie z Azji. Sprowadzono go do Europy jako ptak do polowań już ponad tysiąc lat temu!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Phasianus_colchicus_2_%28Marek_Szczepanek%29.jpg/480px-Phasianus_colchicus_2_%28Marek_Szczepanek%29.jpg",
+    xenoQuery: "Phasianus+colchicus+cnt:Poland"
+  },
+  {
+    rank: 16,
+    name: "Łabędź niemy",
+    latin: "Cygnus olor",
+    emoji: "🦢",
+    habitat: "woda",
+    teaser: "Biały jak śnieg. Najpiękniejszy ptak na wodzie!",
+    desc: "Łabędź niemy to duży, biały ptak z pomarańczowym dziobem z czarną kłębą. Mieszka na stawach, jeziorach i rzekach. Jest bardzo elegancki podczas pływania. Łabędzie dobierają się w pary na całe życie!",
+    funFact: "Łabędź 'niemy' wcale nie jest niemy! Potrafi syczeć, trąbić i chrząkać. Swoje imię dostał, bo jest cichszy od innych łabędzi.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Cygnus_olor_-_Swan_Brugges.jpg/480px-Cygnus_olor_-_Swan_Brugges.jpg",
+    xenoQuery: "Cygnus+olor+cnt:Poland"
+  },
+  {
+    rank: 17,
+    name: "Kaczka krzyżówka",
+    latin: "Anas platyrhynchos",
+    emoji: "🦆",
+    habitat: "woda",
+    teaser: "Kwa-kwa! Najpopularniejsza kaczka w Polsce.",
+    desc: "Kaczka krzyżówka to najpospolitsza kaczka w Polsce. Samiec ma zieloną głowę i żółty dziób. Samice są brązowe, żeby być niewidoczne w trawie przy gnieździe. Krzyżówki nurkują po jedzenie i podrzucają wodę do tyłu.",
+    funFact: "Kaczka nigdy nie mocni nóg ani nie miewa dreszczów w zimnej wodzie — ma specjalne naczynia krwionośne, które ogrzewają nogi!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Anas_platyrhynchos_male_female_quadrat.jpg/480px-Anas_platyrhynchos_male_female_quadrat.jpg",
+    xenoQuery: "Anas+platyrhynchos+cnt:Poland"
+  },
+  {
+    rank: 18,
+    name: "Czapla siwa",
+    latin: "Ardea cinerea",
+    emoji: "🦅",
+    habitat: "woda",
+    teaser: "Wysoka i cierpliwa. Stoi godzinami czekając na rybę.",
+    desc: "Czapla siwa to wysoki ptak z szarymi piórami i długim, żółtym dziobem. Stoi bez ruchu w płytkiej wodzie czekając na ryby. Kiedy ryba podpłynie — błyskawicznie atakuje! Ma długą, esowatą szyję i duże skrzydła.",
+    funFact: "Czapla może stać bez ruchu przez kilka godzin! Ma więcej cierpliwości niż większość dzieci i dorosłych razem wziętych.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Ardea_cinerea_-England-8_%281%29.jpg/480px-Ardea_cinerea_-England-8_%281%29.jpg",
+    xenoQuery: "Ardea+cinerea+cnt:Poland"
+  },
+  {
+    rank: 19,
+    name: "Pliszka siwa",
+    latin: "Motacilla alba",
+    emoji: "⚪",
+    habitat: "miasto",
+    teaser: "Czarno-biała i ciągle kiwa ogonem!",
+    desc: "Pliszka siwa to elegancki, czarno-biały ptaszek, który ciągle kiwa długim ogonem. Biega po trotuarach, parkingach i brzegach rzek szukając owadów. Jest bardzo pewna siebie i nie boi się ludzi ani samochodów!",
+    funFact: "Pliszka kiwa ogonem przez cały dzień. Nikt dokładnie nie wie dlaczego to robi, ale wygląda to super!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Motacilla_alba_alba_-_Rambla_del_Pollo.jpg/480px-Motacilla_alba_alba_-_Rambla_del_Pollo.jpg",
+    xenoQuery: "Motacilla+alba+cnt:Poland"
+  },
+  {
+    rank: 20,
+    name: "Mazurek",
+    latin: "Passer montanus",
+    emoji: "🐦",
+    habitat: "miasto",
+    teaser: "Kuzyn wróbla z brązową czapeczką i czarną plamką.",
+    desc: "Mazurek wygląda podobnie do wróbla, ale ma brązową czapkę i czarną plamkę na białym policzku. Obie płcie wyglądają tak samo! Mazurek mieszka chętnie na wsi, w sadach i ogrodach z drzewami owocowymi.",
+    funFact: "Mazurek jest mniejszy od wróbla i bardziej nieśmiały. Często mieszka na wsiach, gdzie wróbel mieszka w miastach.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Passer_montanus_-_side_%28aka%29.jpg/480px-Passer_montanus_-_side_%28aka%29.jpg",
+    xenoQuery: "Passer+montanus+cnt:Poland"
+  },
+  {
+    rank: 21,
+    name: "Modraszka",
+    latin: "Cyanistes caeruleus",
+    emoji: "💙",
+    habitat: "las",
+    teaser: "Niebieska czapeczka i żółty brzuszek. Akrobata gałęzi!",
+    desc: "Modraszka to mały ptaszek z niebieską czapeczką i skrzydłami oraz żółtym brzuszkiem. Jest świetną akrobatką — często wisi do góry nogami na gałęziach szukając owadów. Chętnie gnieździ się w budkach lęgowych.",
+    funFact: "Modraszka lubi kraść jedzenie od innych ptaków. Obserwuje, gdzie chowają zapasy i potem je zjada!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Cyanistes_caeruleus_-_Rambla_del_Pollo.jpg/480px-Cyanistes_caeruleus_-_Rambla_del_Pollo.jpg",
+    xenoQuery: "Cyanistes+caeruleus+cnt:Poland"
+  },
+  {
+    rank: 22,
+    name: "Gawron",
+    latin: "Corvus frugilegus",
+    emoji: "🖤",
+    habitat: "miasto",
+    teaser: "Głośny i mądry. Buduje miasto z gniazd na drzewach!",
+    desc: "Gawron to duży, czarny ptak z fioletowym połyskiem. U podstawy dzioba ma gołą, szarą skórę — po tym go poznamy. Gawrony budują kolonie gniazd — całe 'miasta' na drzewach. Są bardzo inteligentne i towarzyskie.",
+    funFact: "Gawrony potrafią używać narzędzi! Upuszczają orzechy na drogę, żeby samochody je rozgniotły, a potem zjadają.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Corvus_frugilegus_1_%28Marek_Szczepanek%29.jpg/480px-Corvus_frugilegus_1_%28Marek_Szczepanek%29.jpg",
+    xenoQuery: "Corvus+frugilegus+cnt:Poland"
+  },
+  {
+    rank: 23,
+    name: "Wrona siwa",
+    latin: "Corvus cornix",
+    emoji: "🐦",
+    habitat: "miasto",
+    teaser: "Czarno-szara i bardzo mądra. Mieszka w miastach.",
+    desc: "Wrona siwa ma czarną głowę, skrzydła i ogon, ale szary tułów. Mieszka w parkach i miastach. Jest bardzo inteligentna i ciekawa świata. Lubi obserwować ludzi i korzystać z ich resztek jedzenia.",
+    funFact: "Wrona zapamiętuje twarze ludzi! Jeśli ją skrzywdzisz, zapamięta cię i będzie na ciebie krzyczeć. A jeśli ją nakarmisz — może przynieść ci prezent!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Corvus_cornix_-_Stralsund%2C_Germany.jpg/480px-Corvus_cornix_-_Stralsund%2C_Germany.jpg",
+    xenoQuery: "Corvus+cornix+cnt:Poland"
+  },
+  {
+    rank: 24,
+    name: "Sójka",
+    latin: "Garrulus glandarius",
+    emoji: "🔵",
+    habitat: "las",
+    teaser: "Kolorowa jak papuga i głośna jak alarm leśny!",
+    desc: "Sójka to piękny ptak z rudo-brązowym upierzeniem i niebieskim paskiem na skrzydle. Jest bardzo głośna i alarmuje inne zwierzęta kiedy nadchodzi niebezpieczeństwo. Lubi żołędzie — zbiera je jesienią i zakopuje na zimę.",
+    funFact: "Sójka to prawdziwy leśny magazynier! Zakopuje kilka tysięcy żołędzi jesienią. Te zapomniane żołędzie wyrastają na nowe dęby!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Garrulus_glandarius_-_Jay_-_Eurasian_Jay.jpg/480px-Garrulus_glandarius_-_Jay_-_Eurasian_Jay.jpg",
+    xenoQuery: "Garrulus+glandarius+cnt:Poland"
+  },
+  {
+    rank: 25,
+    name: "Kowalik",
+    latin: "Sitta europaea",
+    emoji: "🔵",
+    habitat: "las",
+    teaser: "Chodzi po pniach drzew do góry nogami!",
+    desc: "Kowalik to niesamowity ptak — jest jedynym ptakiem w Polsce, który potrafi chodzić po pniach drzew głową w dół! Ma niebiesko-szary grzbiet i rudy brzuch. Szuka owadów ukrytych w korze drzew.",
+    funFact: "Kowalik zamieszkuje dziuple wykute przez dzięcioły. Jeśli dziupla jest za duża, zwęża wejście gliną tak, żeby pasowało na jego wymiar!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Eurasian_Nuthatch_aka.jpg/480px-Eurasian_Nuthatch_aka.jpg",
+    xenoQuery: "Sitta+europaea+cnt:Poland"
+  },
+  {
+    rank: 26,
+    name: "Pierwiosnek",
+    latin: "Phylloscopus collybita",
+    emoji: "🍃",
+    habitat: "las",
+    teaser: "'Cip-cap, cip-cap' — pierwszy głos wiosny!",
+    desc: "Pierwiosnek to mały, zielonawo-brązowy ptaszek, który przylatuje do nas jako jeden z pierwszych zwiastunów wiosny. Jego głos 'cip-cap, cip-cap' słychać już w marcu. Jest malutki — waży tylko tyle co dwie monety!",
+    funFact: "Pierwiosnek waży tylko 7-8 gramów, ale zimuje w Afryce i każdej wiosny wraca do dokładnie tego samego miejsca w lesie!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Phylloscopus_collybita_ab.jpg/480px-Phylloscopus_collybita_ab.jpg",
+    xenoQuery: "Phylloscopus+collybita+cnt:Poland"
+  },
+  {
+    rank: 27,
+    name: "Pełzacz leśny",
+    latin: "Certhia familiaris",
+    emoji: "🌳",
+    habitat: "las",
+    teaser: "Wspina się po pniach jak mała myszka z dziobem!",
+    desc: "Pełzacz leśny to malutki ptak, który wygląda jak brązowa myszka wspinająca się po pniu drzewa. Zaczyna zawsze od dołu i spiralnie wspina się ku górze szukając owadów w korze. Ma długi, zakrzywiony dziób jak pinceta.",
+    funFact: "Pełzacz używa swojego ogona jako podpórki kiedy wspina się po drzewie — jak pilarz z pasem bezpieczeństwa!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Certhia_familiaris_-_Eurasian_Treecreeper.jpg/480px-Certhia_familiaris_-_Eurasian_Treecreeper.jpg",
+    xenoQuery: "Certhia+familiaris+cnt:Poland"
+  },
+  {
+    rank: 28,
+    name: "Kopciuszek",
+    latin: "Phoenicurus ochruros",
+    emoji: "🔥",
+    habitat: "miasto",
+    teaser: "Ruda kitka ciągle się trzęsie. Mieszka na dachach!",
+    desc: "Kopciuszek to czarny ptaszek z rudym ogonkiem, który ciągle się trzęsie. Samiec jest czarny z rdzawym ogonem i białą plamką na skrzydle. Mieszka chętnie na budynkach i murach. Jest jednym z pierwszych ptaków śpiewających o świcie.",
+    funFact: "Kopciuszek śpiewa już o czwartej rano! Budzi się wcześniej niż inne ptaki. I znacznie wcześniej niż ty!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Black_Redstart_Phoenicurus_ochruros.jpg/480px-Black_Redstart_Phoenicurus_ochruros.jpg",
+    xenoQuery: "Phoenicurus+ochruros+cnt:Poland"
+  },
+  {
+    rank: 29,
+    name: "Gil",
+    latin: "Pyrrhula pyrrhula",
+    emoji: "❤️",
+    habitat: "las",
+    teaser: "Samiec ma różowo-czerwony brzuszek jak jabłko!",
+    desc: "Gil to jeden z najładniejszych ptaków zimowych. Samiec ma intensywnie różowo-czerwony brzuszek, czarną czapkę i szary grzbiet. Samice są bardziej brązowe. Gile przylatują do ogrodów zimą i jedzą jagody i nasiona.",
+    funFact: "Gil jest bardzo nieśmiały i cichy. Jego delikatny głosik 'fiuu-fiuu' słyszy się rzadko. Woli mówić za siebie pięknymi kolorami!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Pyrrhula_pyrrhula_%28Marek_Szczepanek%29.jpg/480px-Pyrrhula_pyrrhula_%28Marek_Szczepanek%29.jpg",
+    xenoQuery: "Pyrrhula+pyrrhula+cnt:Poland"
+  },
+  {
+    rank: 30,
+    name: "Dzwoniec",
+    latin: "Chloris chloris",
+    emoji: "💚",
+    habitat: "las",
+    teaser: "Zielono-żółty ptak z głośnym śpiewem.",
+    desc: "Dzwoniec to gruby zielonkawy ptaszek z żółtymi skrzydłami. Ma mocny, gruby dziób do łuskania nasion. Śpiewa głośno i chętnie — 'dźwiiiiik, dźwiiiiik' rozlega się w sadach i lasach. Zimą chętnie odwiedza karmniki.",
+    funFact: "Dzwoniec tak bardzo lubi słoneczniki, że potrafi zjeść kilkadziesiąt nasion w ciągu minuty. Jest mistrzem łuskania!",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Chloris_chloris_male_2_%28Marek_Szczepanek%29.jpg/480px-Chloris_chloris_male_2_%28Marek_Szczepanek%29.jpg",
+    xenoQuery: "Chloris+chloris+cnt:Poland"
+  }
+];
+
+// ===== HABITAT CONFIG =====
+const habitatConfig = {
+  las:    { label: "Las 🌲",    colorClass: "badge-las",    color: "#4caf50" },
+  miasto: { label: "Miasto 🏙️", colorClass: "badge-miasto", color: "#ff9800" },
+  woda:   { label: "Woda 💧",   colorClass: "badge-woda",   color: "#2196f3" },
+  pole:   { label: "Pole 🌾",   colorClass: "badge-pole",   color: "#ffc107" },
+  gory:   { label: "Góry ⛰️",  colorClass: "badge-gory",   color: "#9c27b0" }
+};
+
+// ===== STATE =====
+let currentHabitat = 'all';
+let currentSearch  = '';
+let currentAudio   = null;
+let currentSpeech  = null;
+let activeBird     = null;
+let isSpeaking     = false;
+
+// ===== FLYING BIRDS HERO =====
+function initFlyingBirds() {
+  const container = document.getElementById('flyingBirds');
+  const birdEmojis = ['🐦','🦅','🦆','🦉','🦢','🐧','🦜','🐤','🦩','🦚'];
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('span');
+    el.className = 'bird-fly';
+    el.textContent = birdEmojis[i % birdEmojis.length];
+    const top = 10 + Math.random() * 75;
+    const dur = 6 + Math.random() * 8;
+    const delay = Math.random() * -12;
+    const size = 1.2 + Math.random() * 1.5;
+    el.style.cssText = `top:${top}%;font-size:${size}rem;animation-duration:${dur}s;animation-delay:${delay}s;`;
+    container.appendChild(el);
+  }
+}
+
+// ===== FILTER / SORT =====
+function setHabitat(h) {
+  currentHabitat = h;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-habitat="${h}"]`).classList.add('active');
+  renderCards();
+}
+
+function getFiltered() {
+  let list = [...birds];
+  if (currentHabitat !== 'all') {
+    list = list.filter(b => b.habitat === currentHabitat);
+  }
+  if (currentSearch.trim()) {
+    const q = currentSearch.trim().toLowerCase();
+    list = list.filter(b =>
+      b.name.toLowerCase().includes(q) ||
+      b.latin.toLowerCase().includes(q) ||
+      b.habitat.toLowerCase().includes(q)
+    );
+  }
+  const sort = document.getElementById('sortSelect').value;
+  if (sort === 'rank-asc')  list.sort((a,b) => a.rank - b.rank);
+  if (sort === 'rank-desc') list.sort((a,b) => b.rank - a.rank);
+  if (sort === 'name-asc')  list.sort((a,b) => a.name.localeCompare(b.name, 'pl'));
+  if (sort === 'name-desc') list.sort((a,b) => b.name.localeCompare(a.name, 'pl'));
+  return list;
+}
+
+// ===== RENDER CARDS =====
+function renderCards() {
+  const grid = document.getElementById('birdsGrid');
+  const list = getFiltered();
+  const count = document.getElementById('resultsCount');
+  count.textContent = list.length === 0 ? '' : `Pokazuję ${list.length} z ${birds.length} ptaków`;
+
+  grid.innerHTML = '';
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <span class="empty-emoji">🔍</span>
+        <h3>Nie znaleziono ptaka</h3>
+        <p>Spróbuj innej nazwy lub usuń filtry.</p>
+      </div>`;
+    return;
+  }
+
+  list.forEach((bird, idx) => {
+    const hc = habitatConfig[bird.habitat] || {};
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.idx = idx;
+    card.style.animationDelay = `${idx * 0.06}s`;
+
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <div class="card-emoji-fallback" id="emoji-${bird.rank}">${bird.emoji}</div>
+        <img
+          src="${bird.img}"
+          alt="${bird.name}"
+          loading="lazy"
+          onload="this.style.display='block'; document.getElementById('emoji-${bird.rank}').style.display='none';"
+          onerror="this.style.display='none';"
+          style="display:none"
+        />
+        <span class="habitat-badge ${hc.colorClass}">${hc.label}</span>
+        <span class="rank-badge">⭐ #${bird.rank}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${bird.name}</div>
+        <div class="card-latin">${bird.latin}</div>
+        <div class="card-desc">${bird.teaser}</div>
+        <div class="card-actions">
+          <button class="btn btn-sound" id="snd-${bird.rank}" onclick="playSound(event, ${bird.rank})">🔊 Posłuchaj</button>
+          <button class="btn btn-tts" id="tts-${bird.rank}" onclick="speakCard(event, ${bird.rank})">📖 Czytaj</button>
+          <button class="btn btn-more" onclick="openModal(${bird.rank})">🔍 Więcej</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // IntersectionObserver for staggered animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  grid.querySelectorAll('.card').forEach(c => observer.observe(c));
+}
+
+// ===== SOUND SYSTEM =====
+async function playSound(event, rank) {
+  event.stopPropagation();
+  const bird = birds.find(b => b.rank === rank);
+  if (!bird) return;
+
+  const btn = document.getElementById(`snd-${rank}`);
+
+  // Stop if already playing
+  if (currentAudio && !currentAudio.paused) {
+    currentAudio.pause();
+    currentAudio = null;
+    document.querySelectorAll('.btn-sound.playing').forEach(b => {
+      b.classList.remove('playing');
+      b.textContent = '🔊 Posłuchaj';
+    });
+    return;
+  }
+
+  // Fetch from xeno-canto
+  btn.innerHTML = '<span class="spinner"></span> Ładowanie...';
+  btn.disabled = true;
+
+  try {
+    const url = `https://xeno-canto.org/api/2/recordings?query=${bird.xenoQuery}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('fetch failed');
+    const data = await resp.json();
+
+    if (!data.recordings || data.recordings.length === 0) throw new Error('no recordings');
+
+    const rec = data.recordings[0];
+    const audioUrl = rec.file.startsWith('//') ? 'https:' + rec.file : rec.file;
+
+    currentAudio = new Audio(audioUrl);
+    currentAudio.crossOrigin = 'anonymous';
+
+    currentAudio.onended = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '🔊 Posłuchaj';
+      currentAudio = null;
+    };
+    currentAudio.onerror = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '❌ Błąd';
+      setTimeout(() => { btn.innerHTML = '🔊 Posłuchaj'; }, 2000);
+      currentAudio = null;
+    };
+
+    await currentAudio.play();
+    btn.disabled = false;
+    btn.classList.add('playing');
+    btn.innerHTML = '⏹️ Stop';
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '🚫 Brak';
+    setTimeout(() => { btn.innerHTML = '🔊 Posłuchaj'; }, 2500);
+  }
+}
+
+// ===== TTS (card) =====
+function speakCard(event, rank) {
+  event.stopPropagation();
+  const bird = birds.find(b => b.rank === rank);
+  if (!bird) return;
+  const btn = document.getElementById(`tts-${rank}`);
+
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.querySelectorAll('.btn-tts').forEach(b => { b.innerHTML = '📖 Czytaj'; });
+    return;
+  }
+
+  const utter = new SpeechSynthesisUtterance(bird.name + '. ' + bird.desc);
+  utter.lang = 'pl-PL';
+  utter.rate = 0.9;
+  isSpeaking = true;
+  btn.innerHTML = '⏹️ Zatrzymaj';
+
+  utter.onend = () => {
+    isSpeaking = false;
+    btn.innerHTML = '📖 Czytaj';
+  };
+  utter.onerror = () => {
+    isSpeaking = false;
+    btn.innerHTML = '📖 Czytaj';
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
+// ===== MODAL =====
+function openModal(rank) {
+  const bird = birds.find(b => b.rank === rank);
+  if (!bird) return;
+  activeBird = bird;
+
+  const hc = habitatConfig[bird.habitat] || {};
+
+  // Image
+  const modalImg = document.getElementById('modalImg');
+  const modalEmoji = document.getElementById('modalImgEmoji');
+  modalEmoji.textContent = bird.emoji;
+  modalEmoji.style.display = 'flex';
+  modalImg.style.display = 'none';
+  modalImg.src = bird.img;
+  modalImg.onload  = () => { modalImg.style.display='block'; modalEmoji.style.display='none'; };
+  modalImg.onerror = () => { modalImg.style.display='none'; modalEmoji.style.display='flex'; };
+  modalImg.alt = bird.name;
+
+  // Text
+  document.getElementById('modalName').textContent = bird.name;
+  document.getElementById('modalLatin').textContent = bird.latin;
+  document.getElementById('modalDesc').textContent = bird.desc;
+  document.getElementById('modalFunFactText').textContent = bird.funFact;
+
+  // Badges
+  document.getElementById('modalHabitatBadge').innerHTML = `
+    <span class="modal-badge" style="background:${hc.color}20;color:${hc.color};border:2px solid ${hc.color}40">${hc.label}</span>
+    <span class="modal-badge" style="background:#f5f5f5;color:#555">⭐ Ranking #${bird.rank}</span>
+  `;
+
+  // Reset buttons
+  document.getElementById('modalSoundBtn').innerHTML = '🔊 Odtwórz głos';
+  document.getElementById('modalSoundBtn').disabled = false;
+  document.getElementById('modalSoundBtn').classList.remove('playing');
+  document.getElementById('modalTtsBtn').innerHTML = '📖 Przeczytaj głośno';
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (isSpeaking) { window.speechSynthesis.cancel(); isSpeaking = false; }
+  activeBird = null;
+}
+
+function closeModal(event) {
+  if (event.target === document.getElementById('modalOverlay')) {
+    closeModalBtn();
+  }
+}
+
+async function playModalSound() {
+  const btn = document.getElementById('modalSoundBtn');
+  if (!activeBird) return;
+
+  if (currentAudio && !currentAudio.paused) {
+    currentAudio.pause(); currentAudio = null;
+    btn.classList.remove('playing');
+    btn.innerHTML = '🔊 Odtwórz głos';
+    return;
+  }
+
+  btn.innerHTML = '<span class="spinner"></span> Ładowanie...';
+  btn.disabled = true;
+
+  try {
+    const url = `https://xeno-canto.org/api/2/recordings?query=${activeBird.xenoQuery}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if (!data.recordings || data.recordings.length === 0) throw new Error('no recordings');
+
+    const rec = data.recordings[0];
+    const audioUrl = rec.file.startsWith('//') ? 'https:' + rec.file : rec.file;
+
+    currentAudio = new Audio(audioUrl);
+    currentAudio.onended = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '🔊 Odtwórz głos';
+      currentAudio = null;
+    };
+    currentAudio.onerror = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = '❌ Brak nagrania';
+      currentAudio = null;
+    };
+
+    await currentAudio.play();
+    btn.disabled = false;
+    btn.classList.add('playing');
+    btn.innerHTML = '⏹️ Zatrzymaj';
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '🚫 Brak nagrania';
+  }
+}
+
+function speakModal() {
+  if (!activeBird) return;
+  const btn = document.getElementById('modalTtsBtn');
+
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    btn.innerHTML = '📖 Przeczytaj głośno';
+    return;
+  }
+
+  const text = `${activeBird.name}. ${activeBird.desc}. Czy wiesz że: ${activeBird.funFact}`;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'pl-PL';
+  utter.rate = 0.88;
+  isSpeaking = true;
+  btn.innerHTML = '⏹️ Zatrzymaj';
+
+  utter.onend = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
+  utter.onerror = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
+
+  window.speechSynthesis.speak(utter);
+}
+
+// ===== SEARCH =====
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  currentSearch = e.target.value;
+  renderCards();
+});
+
+// ===== SCROLL TO TOP =====
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTop');
+  if (window.scrollY > 400) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModalBtn();
+});
+
+// ===== INIT =====
+initFlyingBirds();
+renderCards();
+</script>
+</body>
+</html>
