@@ -62,13 +62,13 @@ Odpowiedz TYLKO czystym JSON bez markdown.`
       model: 'gpt-5.4-mini-2026-03-17',
       instructions: audiencePrompts[audience] || audiencePrompts['dorosly'],
       input: `Na podstawie tych informacji z Wikipedii napisz opis:\n${wikiText}`,
-      max_completion_tokens: 300,
+      max_output_tokens: 300,
       temperature: 0.7,
       store: false,
     })
   })
   const aiData = await aiRes.json()
-  const rawText = aiData.output_text?.trim() || '{}'
+  const rawText = (aiData.output?.[0]?.content?.[0]?.text || aiData.output_text || "{}").trim()
   
   let description = `Informacje o ptaku ${birdName} są niedostępne.`
   let fun_fact = null
