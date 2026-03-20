@@ -1264,16 +1264,17 @@ async function playSound(event, rank) {
   btn.disabled = true;
 
   try {
-    // Use Wikimedia Commons API for bird sounds
-    const wikiQuery = encodeURIComponent(bird.latin + ' song');
-    const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${wikiQuery}+ogg&srnamespace=6&format=json&origin=*`;
-    const resp = await fetch(wikiUrl);
-    if (!resp.ok) throw new Error('fetch failed');
-    const data = await resp.json();
-    const results = data?.query?.search || [];
-    if (results.length === 0) throw new Error('no recordings');
-    const fileName = results[0].title.replace('File:', '').replace(/ /g, '_');
-    const audioUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodeURIComponent(fileName)}`;
+    const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+
+    const soundRes = await fetch(`${SUPABASE_URL}/functions/v1/bird-sound`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ latinName: bird.latin })
+    });
+    const soundData = await soundRes.json();
+    if (!soundData.url) throw new Error('no recording');
+    const audioUrl = soundData.url;
 
     currentAudio = new Audio(audioUrl);
     currentAudio.crossOrigin = 'anonymous';
@@ -1439,15 +1440,17 @@ async function playModalSound() {
   btn.disabled = true;
 
   try {
-    const wikiQuery2 = encodeURIComponent(activeBird.latin + ' song');
-    const url = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${wikiQuery2}+ogg&srnamespace=6&format=json&origin=*`;
-    const resp = await fetch(url);
-    const data = await resp.json();
+    const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
 
-    if (!data.recordings || data.recordings.length === 0) throw new Error('no recordings');
-
-    const rec = data.recordings[0];
-    const audioUrl = rec.file.startsWith('//') ? 'https:' + rec.file : rec.file;
+    const soundRes = await fetch(`${SUPABASE_URL}/functions/v1/bird-sound`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ latinName: activeBird.latin })
+    });
+    const soundData = await soundRes.json();
+    if (!soundData.url) throw new Error('no recording');
+    const audioUrl = soundData.url;
 
     currentAudio = new Audio(audioUrl);
     currentAudio.onended = () => {
