@@ -1298,8 +1298,21 @@ function renderCards() {
 
   grid.querySelectorAll('.card').forEach(c => observer.observe(c));
 
-  // Load photos from iNaturalist via Edge Function
-  list.forEach(bird => loadBirdPhoto(bird.rank, bird.latin));
+  // Load photos lazily — only when card enters viewport
+  const photoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const rank = parseInt(entry.target.dataset.idx) + 1;
+        const bird = birds[parseInt(entry.target.dataset.idx)];
+        if (bird && !entry.target.dataset.photoLoaded) {
+          entry.target.dataset.photoLoaded = '1';
+          loadBirdPhoto(bird.rank, bird.latin);
+          photoObserver.unobserve(entry.target);
+        }
+      }
+    });
+  }, { rootMargin: '200px' });
+  grid.querySelectorAll('.card').forEach(c => photoObserver.observe(c));
 }
 
 // ===== PHOTO LOADER =====
