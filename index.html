@@ -1711,22 +1711,30 @@ async function speakModalAudienceDesc() {
     return;
   }
 
-  btn.textContent = '⏳';
+  btn.textContent = '⏳ Ładuję...';
+  btn.disabled = true;
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
       body: JSON.stringify({ birdName: activeBird.name, text: modalCurrentAudience.text, audience: modalCurrentAudience.audience })
     });
-    // Response is now audio/mpeg binary — same approach as Xeno-canto
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
+    // Preload — next click will play from cache synchronously
     _sharedAudio.src = audioUrl;
     _sharedAudio.load();
-    _sharedAudio.play().catch(e => console.warn('play error:', e));
   } catch(e) { console.warn('TTS error:', e); }
-  btn.textContent = '🔊 Czytaj';
+  btn.disabled = false;
+  btn.textContent = '▶ Odtwórz';
+  // Now trigger click simulation — user is still in gesture context? No on iOS.
+  // So we just mark as ready and let next click play
+  btn.onclick = () => {
+    _sharedAudio.play().catch(e => console.warn('play:', e));
+    btn.textContent = '🔊 Gra...';
+    _sharedAudio.onended = () => { btn.textContent = '▶ Odtwórz'; };
+  };
 }
 
 // Shared persistent audio element — avoids autoplay policy issues
