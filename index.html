@@ -613,6 +613,14 @@
       padding: 8px 18px;
     }
 
+    .audience-tabs { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .aud-tab { padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #f5f5f5; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+    .aud-tab.active { background: #388e3c; color: white; border-color: #388e3c; }
+    .aud-tab:hover:not(.active) { background: #e8f5e9; }
+    .desc-box { margin-top: 10px; background: #f9fbe7; border-radius: 12px; padding: 12px; min-height: 50px; }
+    .desc-text { font-size: 0.9rem; line-height: 1.6; color: #333; }
+    .desc-speak-btn { margin-top: 8px; padding: 5px 14px; border-radius: 20px; background: #1976d2; color: white; border: none; cursor: pointer; font-size: 0.8rem; display: none; }
+
     /* ===== SCROLL-TO-TOP ===== */
     .scroll-top {
       position: fixed;
@@ -1196,12 +1204,15 @@ function renderCards() {
           <button class="btn btn-sound" id="snd-${bird.rank}" onclick="playSound(event, ${bird.rank})">🔊 Posłuchaj</button>
           <button class="btn btn-tts" id="tts-${bird.rank}" onclick="speakCard(event, ${bird.rank})">📖 Czytaj</button>
           <button class="btn btn-more" onclick="openModal(${bird.rank})">🔍 Więcej</button>
-          <button class="btn btn-child" id="child-btn-${bird.rank}" onclick="loadChildDesc(event, ${bird.rank}, 'card')">🧒 Dla malucha</button>
         </div>
-        <div class="child-desc-card" id="child-card-${bird.rank}">
-          <div class="child-title">🌈 Dla malucha</div>
-          <div class="child-text" id="child-text-${bird.rank}"></div>
-          <button class="btn-read-child" id="child-read-${bird.rank}" onclick="speakChildDesc(event, ${bird.rank}, 'card')">📖 Przeczytaj</button>
+        <div class="audience-tabs" id="aud-tabs-${bird.rank}">
+          <button class="aud-tab active" onclick="loadAudienceDesc(event,${bird.rank},'przedszkolak')">🧒 Maluch</button>
+          <button class="aud-tab" onclick="loadAudienceDesc(event,${bird.rank},'szkolny')">📚 Szkoła</button>
+          <button class="aud-tab" onclick="loadAudienceDesc(event,${bird.rank},'dorosly')">🔬 Dorosły</button>
+        </div>
+        <div class="desc-box" id="desc-box-${bird.rank}">
+          <div class="desc-text" id="desc-text-${bird.rank}">Wybierz grupę wiekową ▲</div>
+          <button class="desc-speak-btn" id="desc-speak-${bird.rank}" onclick="speakAudienceDesc(${bird.rank})">🔊 Czytaj</button>
         </div>
       </div>`;
     grid.appendChild(card);
@@ -1599,6 +1610,86 @@ document.addEventListener('keydown', (e) => {
 // ===== INIT =====
 initFlyingBirds();
 renderCards();
+
+const audienceDescCache = {}; // key: `${rank}-${audience}`
+const audienceAudioCache = {};
+let currentAudienceDesc = {}; // rank -> { audience, text }
+
+async function loadAudienceDesc(event, rank, audience) {
+  if (event) event.stopPropagation();
+  const bird = birds.find(b => b.rank === rank);
+  if (!bird) return;
+
+  // Update tab styles
+  const tabs = document.querySelectorAll(`#aud-tabs-${rank} .aud-tab`);
+  const audienceMap = ['przedszkolak', 'szkolny', 'dorosly'];
+  tabs.forEach((t, i) => t.classList.toggle('active', audienceMap[i] === audience));
+
+  const textEl = document.getElementById(`desc-text-${rank}`);
+  const speakBtn = document.getElementById(`desc-speak-${rank}`);
+  const cacheKey = `${rank}-${audience}`;
+
+  currentAudienceDesc[rank] = { audience, text: null };
+
+  if (audienceDescCache[cacheKey]) {
+    textEl.textContent = audienceDescCache[cacheKey];
+    currentAudienceDesc[rank].text = audienceDescCache[cacheKey];
+    speakBtn.style.display = 'inline-block';
+    return;
+  }
+
+  textEl.textContent = '⏳ Generuję opis z Wikipedii...';
+  speakBtn.style.display = 'none';
+
+  try {
+    const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-describe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ birdName: bird.name, latinName: bird.latin, audience })
+    });
+    const data = await res.json();
+    const text = data.description || 'Opis niedostępny.';
+    audienceDescCache[cacheKey] = text;
+    currentAudienceDesc[rank] = { audience, text };
+    textEl.textContent = text;
+    speakBtn.style.display = 'inline-block';
+  } catch {
+    textEl.textContent = 'Nie udało się wczytać opisu.';
+  }
+}
+
+async function speakAudienceDesc(rank) {
+  const bird = birds.find(b => b.rank === rank);
+  if (!bird) return;
+  const info = currentAudienceDesc[rank];
+  if (!info?.text) return;
+  const btn = document.getElementById(`desc-speak-${rank}`);
+  const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+
+  const audioCacheKey = `${rank}-${info.audience}`;
+  if (audienceAudioCache[audioCacheKey]) {
+    new Audio(audienceAudioCache[audioCacheKey]).play();
+    return;
+  }
+
+  btn.textContent = '⏳ Generuję...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ birdName: bird.name, text: info.text, audience: info.audience })
+    });
+    const data = await res.json();
+    if (data.url) {
+      audienceAudioCache[audioCacheKey] = data.url;
+      new Audio(data.url).play();
+    }
+  } catch { }
+  btn.textContent = '🔊 Czytaj';
+}
 </script>
 </body>
 </html>
