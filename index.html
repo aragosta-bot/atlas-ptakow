@@ -1255,15 +1255,16 @@ async function playSound(event, rank) {
   btn.disabled = true;
 
   try {
-    const url = `https://xeno-canto.org/api/2/recordings?query=${bird.xenoQuery}`;
-    const resp = await fetch(url);
+    // Use Wikimedia Commons API for bird sounds
+    const wikiQuery = encodeURIComponent(bird.latin + ' song');
+    const wikiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${wikiQuery}+ogg&srnamespace=6&format=json&origin=*`;
+    const resp = await fetch(wikiUrl);
     if (!resp.ok) throw new Error('fetch failed');
     const data = await resp.json();
-
-    if (!data.recordings || data.recordings.length === 0) throw new Error('no recordings');
-
-    const rec = data.recordings[0];
-    const audioUrl = rec.file.startsWith('//') ? 'https:' + rec.file : rec.file;
+    const results = data?.query?.search || [];
+    if (results.length === 0) throw new Error('no recordings');
+    const fileName = results[0].title.replace('File:', '').replace(/ /g, '_');
+    const audioUrl = `https://upload.wikimedia.org/wikipedia/commons/${encodeURIComponent(fileName)}`;
 
     currentAudio = new Audio(audioUrl);
     currentAudio.crossOrigin = 'anonymous';
@@ -1430,7 +1431,8 @@ async function playModalSound() {
   btn.disabled = true;
 
   try {
-    const url = `https://xeno-canto.org/api/2/recordings?query=${activeBird.xenoQuery}`;
+    const wikiQuery2 = encodeURIComponent(activeBird.latin + ' song');
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${wikiQuery2}+ogg&srnamespace=6&format=json&origin=*`;
     const resp = await fetch(url);
     const data = await resp.json();
 
