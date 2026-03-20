@@ -538,6 +538,81 @@
     }
     footer strong { color: var(--text); }
 
+    /* ===== CHILD DESCRIPTION ===== */
+    .btn-child {
+      background: #fff9c4;
+      color: #9a6f00;
+      border: 2px solid #ffc107;
+    }
+    .btn-child:hover { background: #ffc107; color: #fff; border-color: #ffc107; }
+    .btn-child.loaded { background: #fff3e0; color: #e65100; border-color: #ff9800; }
+    .child-desc-card {
+      margin-top: 10px;
+      background: linear-gradient(135deg, #fffde7, #fff8e1);
+      border: 2px solid #ffd54f;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #5d4037;
+      font-weight: 600;
+      display: none;
+    }
+    .child-desc-card .child-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.9rem;
+      color: #9a6f00;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .child-desc-card .child-text { font-size: 0.92rem; }
+    .btn-read-child {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: none;
+      background: #ff9800;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-read-child:hover { background: #e65100; transform: scale(1.03); }
+
+    /* Modal child desc */
+    .modal-child-card {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #fffde7, #fff8e1);
+      border: 2.5px solid #ffd54f;
+      border-radius: 20px;
+      padding: 20px;
+      display: none;
+    }
+    .modal-child-card .child-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.15rem;
+      color: #9a6f00;
+      margin-bottom: 8px;
+    }
+    .modal-child-card .child-text {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #5d4037;
+      font-weight: 600;
+    }
+    .modal-child-card .btn-read-child {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      padding: 8px 18px;
+    }
+
     /* ===== SCROLL-TO-TOP ===== */
     .scroll-top {
       position: fixed;
@@ -621,6 +696,12 @@
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Odtwórz głos</button>
         <button class="btn btn-tts"   id="modalTtsBtn"   onclick="speakModal()">📖 Przeczytaj głośno</button>
+        <button class="btn btn-child" id="modalChildBtn" onclick="loadChildDesc(null, null, 'modal')">🧒 Dla malucha</button>
+      </div>
+      <div class="modal-child-card" id="modalChildCard">
+        <div class="child-title">🌈 Dla malucha 🧒</div>
+        <div class="child-text" id="modalChildText"></div>
+        <button class="btn-read-child" id="modalChildRead" onclick="speakChildDesc(null, null, 'modal')">📖 Przeczytaj</button>
       </div>
     </div>
   </div>
@@ -636,6 +717,10 @@
 </footer>
 
 <script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+
 // ===== BIRD DATA =====
 const birds = [
   {
@@ -1111,6 +1196,12 @@ function renderCards() {
           <button class="btn btn-sound" id="snd-${bird.rank}" onclick="playSound(event, ${bird.rank})">🔊 Posłuchaj</button>
           <button class="btn btn-tts" id="tts-${bird.rank}" onclick="speakCard(event, ${bird.rank})">📖 Czytaj</button>
           <button class="btn btn-more" onclick="openModal(${bird.rank})">🔍 Więcej</button>
+          <button class="btn btn-child" id="child-btn-${bird.rank}" onclick="loadChildDesc(event, ${bird.rank}, 'card')">🧒 Dla malucha</button>
+        </div>
+        <div class="child-desc-card" id="child-card-${bird.rank}">
+          <div class="child-title">🌈 Dla malucha</div>
+          <div class="child-text" id="child-text-${bird.rank}"></div>
+          <button class="btn-read-child" id="child-read-${bird.rank}" onclick="speakChildDesc(event, ${bird.rank}, 'card')">📖 Przeczytaj</button>
         </div>
       </div>`;
     grid.appendChild(card);
@@ -1259,6 +1350,25 @@ function openModal(rank) {
   document.getElementById('modalSoundBtn').classList.remove('playing');
   document.getElementById('modalTtsBtn').innerHTML = '📖 Przeczytaj głośno';
 
+  // Reset child card — pre-populate if cached
+  const modalChildCard = document.getElementById('modalChildCard');
+  const modalChildBtn = document.getElementById('modalChildBtn');
+  const modalChildText = document.getElementById('modalChildText');
+  modalChildBtn.innerHTML = '🧒 Dla malucha';
+  modalChildBtn.disabled = false;
+  modalChildBtn.classList.remove('loaded');
+  modalChildBtn.onclick = (e) => loadChildDesc(e, null, 'modal');
+  if (childDescCache[bird.name]) {
+    modalChildText.textContent = childDescCache[bird.name];
+    modalChildCard.style.display = 'block';
+    modalChildBtn.innerHTML = '📖 Przeczytaj';
+    modalChildBtn.classList.add('loaded');
+    modalChildBtn.onclick = (e) => speakChildDesc(e, null, 'modal');
+  } else {
+    modalChildCard.style.display = 'none';
+    modalChildText.textContent = '';
+  }
+
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1344,6 +1454,126 @@ function speakModal() {
 
   utter.onend = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
   utter.onerror = () => { isSpeaking = false; btn.innerHTML = '📖 Przeczytaj głośno'; };
+
+  window.speechSynthesis.speak(utter);
+}
+
+// ===== CHILD DESCRIPTIONS =====
+const childDescCache = {}; // in-memory cache per session
+
+async function loadChildDesc(event, rank, context) {
+  if (event) event.stopPropagation();
+
+  let bird;
+  let btn, cardEl, textEl;
+
+  if (context === 'modal') {
+    bird = activeBird;
+    btn = document.getElementById('modalChildBtn');
+    cardEl = document.getElementById('modalChildCard');
+    textEl = document.getElementById('modalChildText');
+  } else {
+    bird = birds.find(b => b.rank === rank);
+    btn = document.getElementById(`child-btn-${rank}`);
+    cardEl = document.getElementById(`child-card-${rank}`);
+    textEl = document.getElementById(`child-text-${rank}`);
+  }
+
+  if (!bird) return;
+
+  // Already loaded — toggle read
+  if (childDescCache[bird.name]) {
+    textEl.textContent = childDescCache[bird.name];
+    cardEl.style.display = 'block';
+    if (context === 'modal') {
+      btn.innerHTML = '📖 Przeczytaj';
+      btn.onclick = (e) => speakChildDesc(e, null, 'modal');
+    } else {
+      btn.innerHTML = '📖 Przeczytaj';
+      btn.classList.add('loaded');
+    }
+    return;
+  }
+
+  // Show spinner
+  const origLabel = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Myślę...';
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/bird-description`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ birdName: bird.name, description: bird.desc })
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const desc = data.description;
+
+    childDescCache[bird.name] = desc;
+    textEl.textContent = desc;
+    cardEl.style.display = 'block';
+    btn.disabled = false;
+    btn.classList.add('loaded');
+    btn.innerHTML = '📖 Przeczytaj';
+    if (context === 'modal') {
+      btn.onclick = (e) => speakChildDesc(e, null, 'modal');
+    } else {
+      btn.onclick = (e) => speakChildDesc(e, rank, 'card');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '❌ Błąd';
+    setTimeout(() => { btn.innerHTML = origLabel; }, 3000);
+  }
+}
+
+function speakChildDesc(event, rank, context) {
+  if (event) event.stopPropagation();
+
+  let bird, textEl, readBtn;
+
+  if (context === 'modal') {
+    bird = activeBird;
+    textEl = document.getElementById('modalChildText');
+    readBtn = document.getElementById('modalChildRead');
+  } else {
+    bird = birds.find(b => b.rank === rank);
+    textEl = document.getElementById(`child-text-${rank}`);
+    readBtn = document.getElementById(`child-read-${rank}`);
+  }
+
+  if (!bird || !textEl) return;
+  const text = textEl.textContent;
+  if (!text) return;
+
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    if (readBtn) readBtn.innerHTML = '📖 Przeczytaj';
+    return;
+  }
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'pl-PL';
+  utter.rate = 0.85;
+  utter.pitch = 1.1;
+  isSpeaking = true;
+  if (readBtn) readBtn.innerHTML = '⏹️ Stop';
+
+  utter.onend = () => {
+    isSpeaking = false;
+    if (readBtn) readBtn.innerHTML = '📖 Przeczytaj';
+  };
+  utter.onerror = () => {
+    isSpeaking = false;
+    if (readBtn) readBtn.innerHTML = '📖 Przeczytaj';
+  };
 
   window.speechSynthesis.speak(utter);
 }
