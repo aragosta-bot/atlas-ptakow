@@ -731,6 +731,10 @@
 
       <!-- Generated description -->
       <div class="modal-gen-desc" id="modal-desc-text">Wybierz grupę wiekową powyżej ▲</div>
+      <div class="fun-fact" id="modal-fun-fact" style="display:none">
+        <div class="fun-fact-title">💡 Czy wiesz, że...</div>
+        <div class="fun-fact-text" id="modal-fun-fact-text"></div>
+      </div>
 
       <!-- Action buttons -->
       <div class="modal-actions">
@@ -1424,6 +1428,8 @@ function openModal(rank) {
   // Reset audience desc
   document.getElementById('modal-desc-text').textContent = 'Wybierz grupę wiekową powyżej ▲';
   document.getElementById('modal-desc-speak').style.display = 'none';
+  const ffEl = document.getElementById('modal-fun-fact');
+  if (ffEl) ffEl.style.display = 'none';
   document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach((t,i) => t.classList.toggle('active', i===0));
   modalCurrentAudience = { audience: null, text: null };
 
@@ -1762,6 +1768,15 @@ async function loadModalAudienceDesc(audience) {
     modalCurrentAudience = { audience, text };
     textEl.textContent = text;
     speakBtn.style.display = 'inline-block';
+    // Show fun fact if present
+    const funFactEl = document.getElementById('modal-fun-fact');
+    const funFactTextEl = document.getElementById('modal-fun-fact-text');
+    if (data.fun_fact && funFactEl && funFactTextEl) {
+      funFactTextEl.textContent = data.fun_fact;
+      funFactEl.style.display = 'block';
+    } else if (funFactEl) {
+      funFactEl.style.display = 'none';
+    }
   } catch {
     textEl.textContent = 'Nie udało się wczytać opisu.';
   }
