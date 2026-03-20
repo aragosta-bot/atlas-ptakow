@@ -8,6 +8,7 @@ const cors = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
+
   try {
     const { birdName, text, audience } = await req.json()
     const aud = audience || 'dorosly'
@@ -17,7 +18,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Check cache in dedicated audio table
+    // Check cache
     const { data: cached } = await supabase
       .from('bird_audio')
       .select('audio_url')
@@ -26,8 +27,15 @@ serve(async (req) => {
       .maybeSingle()
 
     if (cached?.audio_url) {
-      return new Response(JSON.stringify({ url: cached.audio_url, cached: true }), {
-        headers: { ...cors, 'Content-Type': 'application/json' }
+      // Return audio directly as binary response
+      const base64 = cached.audio_url.split(',')[1]
+      const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+      return new Response(binary, {
+        headers: {
+          ...cors,
+          'Content-Type': 'audio/mpeg',
+          'Cache-Control': 'public, max-age=86400',
+        }
       })
     }
 
@@ -48,18 +56,23 @@ serve(async (req) => {
     if (!response.ok) throw new Error(`ElevenLabs: ${response.status}`)
 
     const buf = await response.arrayBuffer()
+
+    // Cache as base64
     const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)))
     const dataUrl = `data:audio/mpeg;base64,${base64}`
 
-    // Save to dedicated audio cache table
-    const { error: insertError } = await supabase
-      .from('bird_audio')
-      .upsert({ bird_name: birdName, audience: aud, audio_url: dataUrl }, { onConflict: 'bird_name,audience' })
-    
-    if (insertError) console.error('Cache insert error:', insertError.message)
+    await supabase.from('bird_audio').upsert(
+      { bird_name: birdName, audience: aud, audio_url: dataUrl },
+      { onConflict: 'bird_name,audience' }
+    )
 
-    return new Response(JSON.stringify({ url: dataUrl, cached: false }), {
-      headers: { ...cors, 'Content-Type': 'application/json' }
+    // Return audio directly as binary
+    return new Response(buf, {
+      headers: {
+        ...cors,
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'public, max-age=86400',
+      }
     })
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), {

@@ -1912,11 +1912,6 @@ async function speakModalAudienceDesc() {
     return;
   }
 
-  // Not cached — start play() immediately to preserve user gesture, then load data
-  // iOS requires play() in synchronous user gesture handler
-  _sharedAudio.src = '';
-  const playIntent = _sharedAudio.play().catch(() => {});
-
   btn.textContent = '⏳';
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
@@ -1924,14 +1919,13 @@ async function speakModalAudienceDesc() {
       headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
       body: JSON.stringify({ birdName: activeBird.name, text: modalCurrentAudience.text, audience: modalCurrentAudience.audience })
     });
-    const data = await res.json();
-    if (data.url) {
-      audienceAudioCache[cacheKey] = data.url;
-      _sharedAudio.pause();
-      _sharedAudio.src = data.url;
-      _sharedAudio.load();
-      _sharedAudio.play().catch(e => console.warn('play error:', e));
-    }
+    // Response is now audio/mpeg binary — same approach as Xeno-canto
+    const blob = await res.blob();
+    const audioUrl = URL.createObjectURL(blob);
+    audienceAudioCache[cacheKey] = audioUrl;
+    _sharedAudio.src = audioUrl;
+    _sharedAudio.load();
+    _sharedAudio.play().catch(e => console.warn('play error:', e));
   } catch(e) { console.warn('TTS error:', e); }
   btn.textContent = '🔊 Czytaj';
 }
@@ -1941,13 +1935,12 @@ const _sharedAudio = document.createElement('audio');
 _sharedAudio.preload = 'none';
 document.body.appendChild(_sharedAudio);
 
-function playDataUrl(dataUrl) {
+function playDataUrl(url) {
   try {
     _sharedAudio.pause();
-    _sharedAudio.src = dataUrl;
+    _sharedAudio.src = url;
     _sharedAudio.load();
-    const playPromise = _sharedAudio.play();
-    if (playPromise) playPromise.catch(e => console.warn('Audio play failed:', e));
+    _sharedAudio.play().catch(e => console.warn('Audio play failed:', e));
   } catch(e) {
     console.warn('playDataUrl error:', e);
   }
