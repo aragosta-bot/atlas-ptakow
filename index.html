@@ -621,6 +621,30 @@
     .desc-text { font-size: 0.9rem; line-height: 1.6; color: #333; }
     .desc-speak-btn { margin-top: 8px; padding: 5px 14px; border-radius: 20px; background: #1976d2; color: white; border: none; cursor: pointer; font-size: 0.8rem; display: none; }
 
+    /* ===== MODAL AUDIENCE TABS (new large style) ===== */
+    .modal-audience-tabs { display: flex; gap: 8px; margin: 16px 0 12px; }
+    .modal-aud-tab {
+      flex: 1;
+      padding: 10px 8px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      background: #f5f5f5;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-aud-tab.active { background: #388e3c; color: white; border-color: #388e3c; }
+    .modal-aud-tab:hover:not(.active) { background: #e8f5e9; border-color: #a5d6a7; }
+    .modal-gen-desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #333;
+      min-height: 80px;
+      margin-bottom: 16px;
+    }
+    .modal-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+
     /* ===== SCROLL-TO-TOP ===== */
     .scroll-top {
       position: fixed;
@@ -693,26 +717,25 @@
       <button class="modal-close" onclick="closeModalBtn()">✕</button>
     </div>
     <div class="modal-body">
-      <div id="modalHabitatBadge" class="modal-badges"></div>
-      <h2 class="modal-name" id="modalName"></h2>
+      <!-- Badges and name -->
+      <div class="modal-meta" id="modalMeta"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
       <p class="modal-latin" id="modalLatin"></p>
-      <p class="modal-desc" id="modalDesc"></p>
-      <div class="fun-fact" id="modalFunFact">
-        <div class="fun-fact-title">🤔 Czy wiesz że...?</div>
-        <div class="fun-fact-text" id="modalFunFactText"></div>
+
+      <!-- Audience tabs — large, prominent -->
+      <div class="modal-audience-tabs" id="modal-aud-tabs">
+        <button class="modal-aud-tab active" onclick="loadModalAudienceDesc('przedszkolak')">🧒 Maluch</button>
+        <button class="modal-aud-tab" onclick="loadModalAudienceDesc('szkolny')">📚 Szkoła</button>
+        <button class="modal-aud-tab" onclick="loadModalAudienceDesc('dorosly')">🔬 Dorosły</button>
       </div>
+
+      <!-- Generated description -->
+      <div class="modal-gen-desc" id="modal-desc-text">Wybierz grupę wiekową powyżej ▲</div>
+
+      <!-- Action buttons -->
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
-        <button class="btn btn-tts"   id="modalTtsBtn"   onclick="speakModal()">📖 Przeczytaj głośno</button>
-      </div>
-      <div class="audience-tabs" id="modal-aud-tabs">
-        <button class="aud-tab active" onclick="loadModalAudienceDesc('przedszkolak')">🧒 Maluch</button>
-        <button class="aud-tab" onclick="loadModalAudienceDesc('szkolny')">📚 Szkoła</button>
-        <button class="aud-tab" onclick="loadModalAudienceDesc('dorosly')">🔬 Dorosły</button>
-      </div>
-      <div class="desc-box" id="modal-desc-box">
-        <div class="desc-text" id="modal-desc-text">Wybierz grupę wiekową ▲</div>
-        <button class="desc-speak-btn" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj</button>
+        <button class="btn btn-tts" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">📖 Czytaj głośno</button>
       </div>
     </div>
   </div>
@@ -1384,27 +1407,24 @@ function openModal(rank) {
   })();
 
   // Text
-  document.getElementById('modalName').textContent = bird.name;
+  document.getElementById('modalTitle').textContent = bird.name;
   document.getElementById('modalLatin').textContent = bird.latin;
-  document.getElementById('modalDesc').textContent = bird.desc;
-  document.getElementById('modalFunFactText').textContent = bird.funFact;
 
   // Badges
-  document.getElementById('modalHabitatBadge').innerHTML = `
+  document.getElementById('modalMeta').innerHTML = `
     <span class="modal-badge" style="background:${hc.color}20;color:${hc.color};border:2px solid ${hc.color}40">${hc.label}</span>
     <span class="modal-badge" style="background:#f5f5f5;color:#555">⭐ Ranking #${bird.rank}</span>
   `;
 
-  // Reset buttons
+  // Reset sound button
   document.getElementById('modalSoundBtn').innerHTML = '🔊 Posłuchaj ptaka';
   document.getElementById('modalSoundBtn').disabled = false;
   document.getElementById('modalSoundBtn').classList.remove('playing');
-  document.getElementById('modalTtsBtn').innerHTML = '📖 Przeczytaj głośno';
 
   // Reset audience desc
-  document.getElementById('modal-desc-text').textContent = 'Wybierz grupę wiekową ▲';
+  document.getElementById('modal-desc-text').textContent = 'Wybierz grupę wiekową powyżej ▲';
   document.getElementById('modal-desc-speak').style.display = 'none';
-  document.querySelectorAll('#modal-aud-tabs .aud-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach((t,i) => t.classList.toggle('active', i===0));
   modalCurrentAudience = { audience: null, text: null };
 
   document.getElementById('modalOverlay').classList.add('open');
@@ -1708,7 +1728,7 @@ async function speakAudienceDesc(rank) {
 async function loadModalAudienceDesc(audience) {
   if (!activeBird) return;
 
-  document.querySelectorAll('#modal-aud-tabs .aud-tab').forEach((t, i) => {
+  document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach((t, i) => {
     const auds = ['przedszkolak', 'szkolny', 'dorosly'];
     t.classList.toggle('active', auds[i] === audience);
   });
