@@ -1251,11 +1251,24 @@ function renderCards() {
   grid.querySelectorAll('.card').forEach(c => observer.observe(c));
 
   // Load photos lazily — only when card enters viewport
+  // Load photos for all visible cards immediately + lazily for rest
+  list.forEach((bird, idx) => {
+    const card = grid.children[idx];
+    if (card) {
+      const rect = card.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 400) {
+        // Already visible — load immediately
+        loadBirdPhoto(bird.rank, bird.latin);
+        card.dataset.photoLoaded = '1';
+      }
+    }
+  });
+
   const photoObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const rank = parseInt(entry.target.dataset.idx) + 1;
-        const bird = birds[parseInt(entry.target.dataset.idx)];
+        const idx = parseInt(entry.target.dataset.idx);
+        const bird = birds[idx];
         if (bird && !entry.target.dataset.photoLoaded) {
           entry.target.dataset.photoLoaded = '1';
           loadBirdPhoto(bird.rank, bird.latin);
@@ -1263,8 +1276,8 @@ function renderCards() {
         }
       }
     });
-  }, { rootMargin: '200px' });
-  grid.querySelectorAll('.card').forEach(c => photoObserver.observe(c));
+  }, { rootMargin: '400px', threshold: 0 });
+  grid.querySelectorAll('.card:not([data-photo-loaded])').forEach(c => photoObserver.observe(c));
 }
 
 // ===== PHOTO LOADER =====
