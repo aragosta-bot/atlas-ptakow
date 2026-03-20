@@ -1705,13 +1705,19 @@ async function speakModalAudienceDesc() {
 
   const cacheKey = `${activeBird.rank}-${modalCurrentAudience.audience}`;
 
-  // If cached — play immediately (synchronous user gesture context preserved)
+  // Unlock audio context synchronously on user gesture — Chrome requires this
+  _sharedAudio.play().catch(() => {});
+
+  // If cached — swap src and play
   if (audienceAudioCache[cacheKey]) {
-    playDataUrl(audienceAudioCache[cacheKey]);
+    _sharedAudio.pause();
+    _sharedAudio.src = audienceAudioCache[cacheKey];
+    _sharedAudio.load();
+    _sharedAudio.play().catch(e => console.warn('play cached:', e));
     return;
   }
 
-  btn.textContent = '⏳ Ładuję...';
+  btn.textContent = '⏳';
   btn.disabled = true;
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
@@ -1722,14 +1728,13 @@ async function speakModalAudienceDesc() {
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
+    _sharedAudio.pause();
     _sharedAudio.src = audioUrl;
     _sharedAudio.load();
-    await _sharedAudio.play();
-    btn.textContent = '⏹ Stop';
-    _sharedAudio.onended = () => { btn.textContent = '🔊 Czytaj opis'; btn.disabled = false; };
-  } catch(e) { console.warn('TTS error:', e); }
+    _sharedAudio.play().catch(e => console.warn('play fetched:', e));
+  } catch(e) { console.warn('TTS fetch error:', e); }
   btn.disabled = false;
-  if (btn.textContent === '⏳ Ładuję...') btn.textContent = '🔊 Czytaj opis';
+  btn.textContent = '🔊 Czytaj opis';
 }
 
 // Shared persistent audio element — avoids autoplay policy issues
