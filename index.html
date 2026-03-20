@@ -1851,9 +1851,18 @@ async function loadModalAudienceDesc(audience) {
   const cacheKey = `${activeBird.rank}-${audience}`;
 
   if (audienceDescCache[cacheKey]) {
-    textEl.textContent = audienceDescCache[cacheKey];
-    modalCurrentAudience = { audience, text: audienceDescCache[cacheKey] };
+    const cached = audienceDescCache[cacheKey];
+    textEl.textContent = cached.text;
+    modalCurrentAudience = { audience, text: cached.text };
     speakBtn.style.display = 'inline-block';
+    const funFactEl = document.getElementById('modal-fun-fact');
+    const funFactTextEl = document.getElementById('modal-fun-fact-text');
+    if (cached.fun_fact && funFactEl && funFactTextEl) {
+      funFactTextEl.textContent = cached.fun_fact;
+      funFactEl.style.display = 'block';
+    } else if (funFactEl) {
+      funFactEl.style.display = 'none';
+    }
     return;
   }
 
@@ -1871,7 +1880,7 @@ async function loadModalAudienceDesc(audience) {
     });
     const data = await res.json();
     const text = data.description || 'Opis niedostępny.';
-    audienceDescCache[cacheKey] = text;
+    audienceDescCache[cacheKey] = { text, fun_fact: data.fun_fact || null };
     modalCurrentAudience = { audience, text };
     textEl.textContent = text;
     speakBtn.style.display = 'inline-block';
