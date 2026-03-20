@@ -1314,9 +1314,14 @@ async function loadBirdPhoto(rank, latinName) {
     const url = data.urls?.[0] || data.url;
     if (url) {
       const img = document.getElementById(`photo-${rank}`);
-      if (img) img.src = url;
+      const emoji = document.getElementById(`emoji-${rank}`);
+      if (img) {
+        img.onload = () => { img.style.display = 'block'; if (emoji) emoji.style.display = 'none'; };
+        img.onerror = () => { img.style.display = 'none'; };
+        img.src = url;
+      }
     }
-  } catch {}
+  } catch(e) { console.warn('loadBirdPhoto error:', rank, e); }
 }
 
 // ===== SOUND SYSTEM =====
