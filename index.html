@@ -446,13 +446,62 @@
     }
     .modal-close:hover { transform: scale(1.1); background: #fff; }
 
-    .modal-gallery { position: relative; }
-    .gallery-nav { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 0; }
-    .gallery-btn { background: none; border: 2px solid #ccc; border-radius: 50%; width: 36px; height: 36px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .gallery-btn:hover { background: #f0f0f0; }
-    .gallery-dots { display: flex; gap: 6px; }
-    .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; transition: background 0.2s; }
-    .gallery-dot.active { background: #388e3c; }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 1;
+    }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      font-size: 3rem;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      line-height: 1;
+      z-index: 1;
+      transition: background 0.2s;
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.3); }
+    .lightbox-prev { left: 16px; }
+    .lightbox-next { right: 16px; }
+    .lightbox-counter {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .modal-body {
       padding: 28px;
@@ -721,14 +770,7 @@
   <div class="modal" id="modal">
     <div class="modal-img-wrap" id="modalImgWrap">
       <div class="modal-img-emoji" id="modalImgEmoji"></div>
-      <div class="modal-gallery">
-        <img class="modal-img" id="modalImg" alt="" onerror="this.style.display='none'" style="display:none" />
-        <div class="gallery-nav" id="galleryNav" style="display:none">
-          <button class="gallery-btn" id="galleryPrev" onclick="galleryNav(-1)">‹</button>
-          <span class="gallery-dots" id="galleryDots"></span>
-          <button class="gallery-btn" id="galleryNext" onclick="galleryNav(1)">›</button>
-        </div>
-      </div>
+      <img class="modal-img" id="modalImg" alt="" onerror="this.style.display='none'" style="display:none;cursor:zoom-in" onclick="openLightbox()" />
       <button class="modal-close" onclick="closeModalBtn()">✕</button>
     </div>
     <div class="modal-body">
@@ -758,6 +800,15 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()" style="display:none">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1); event.stopPropagation()">‹</button>
+  <img class="lightbox-img" id="lightboxImg" alt="" />
+  <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1); event.stopPropagation()">›</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
 </div>
 
 <!-- SCROLL TO TOP -->
@@ -1346,22 +1397,38 @@ async function speakWithElevenLabs(text, birdName, btn, labelDefault) {
 let galleryPhotos = [];
 let galleryIndex = 0;
 
-function galleryNav(dir) {
-  galleryIndex = (galleryIndex + dir + galleryPhotos.length) % galleryPhotos.length;
-  updateGallery();
+// ===== LIGHTBOX =====
+let lightboxPhotos = [];
+let lightboxIndex = 0;
+
+function openLightbox() {
+  if (!galleryPhotos || galleryPhotos.length === 0) return;
+  lightboxPhotos = galleryPhotos;
+  lightboxIndex = galleryIndex;
+  updateLightbox();
+  document.getElementById('lightbox').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 
-function updateGallery() {
-  const img = document.getElementById('modalImg');
-  if (img && galleryPhotos[galleryIndex]) {
-    img.src = galleryPhotos[galleryIndex];
-  }
-  const dots = document.getElementById('galleryDots');
-  if (dots) {
-    dots.innerHTML = galleryPhotos.map((_, i) =>
-      `<div class="gallery-dot ${i === galleryIndex ? 'active' : ''}"></div>`
-    ).join('');
-  }
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function lightboxNav(dir) {
+  lightboxIndex = (lightboxIndex + dir + lightboxPhotos.length) % lightboxPhotos.length;
+  updateLightbox();
+}
+
+function updateLightbox() {
+  const img = document.getElementById('lightboxImg');
+  const counter = document.getElementById('lightboxCounter');
+  if (img) img.src = lightboxPhotos[lightboxIndex] || '';
+  if (counter) counter.textContent = `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
+  const prev = document.querySelector('.lightbox-prev');
+  const next = document.querySelector('.lightbox-next');
+  if (prev) prev.style.display = lightboxPhotos.length > 1 ? 'block' : 'none';
+  if (next) next.style.display = lightboxPhotos.length > 1 ? 'block' : 'none';
 }
 
 async function loadModalPhotos(latinName) {
@@ -1377,9 +1444,12 @@ async function loadModalPhotos(latinName) {
     galleryPhotos = data.urls || [];
     galleryIndex = 0;
     if (galleryPhotos.length > 0) {
-      updateGallery();
-      const nav = document.getElementById('galleryNav');
-      if (nav) nav.style.display = galleryPhotos.length > 1 ? 'flex' : 'none';
+      const img = document.getElementById('modalImg');
+      if (img) {
+        img.src = galleryPhotos[0];
+        img.style.display = 'block';
+        document.getElementById('modalImgEmoji').style.display = 'none';
+      }
     }
   } catch {}
 }
@@ -1405,8 +1475,6 @@ function openModal(rank) {
   // Reset gallery
   galleryPhotos = [];
   galleryIndex = 0;
-  const gNav = document.getElementById('galleryNav');
-  if (gNav) gNav.style.display = 'none';
   // Load photos via Edge Function
   loadModalPhotos(bird.latin);
 
@@ -1516,6 +1584,13 @@ window.addEventListener('scroll', () => {
 
 // ===== KEYBOARD =====
 document.addEventListener('keydown', (e) => {
+  const lb = document.getElementById('lightbox');
+  if (lb && lb.style.display !== 'none') {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
+    return;
+  }
   if (e.key === 'Escape') closeModalBtn();
 });
 
