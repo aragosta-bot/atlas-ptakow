@@ -31,7 +31,7 @@ serve(async (req) => {
 
     // Generate with ElevenLabs
     const elevenKey = Deno.env.get('ELEVENLABS_API_KEY')!
-    const voiceId = 'cgSgspJ2msm6clMCkdW9' // Jessica - Playful, Bright, Warm
+    const voiceId = 'd4Z5Fvjohw3zxGpV8XUV' // Jessica - Playful, Bright, Warm
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
