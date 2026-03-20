@@ -702,14 +702,17 @@
         <div class="fun-fact-text" id="modalFunFactText"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Odtwórz głos</button>
+        <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
         <button class="btn btn-tts"   id="modalTtsBtn"   onclick="speakModal()">📖 Przeczytaj głośno</button>
-        <button class="btn btn-child" id="modalChildBtn" onclick="loadChildDesc(null, null, 'modal')">🧒 Dla malucha</button>
       </div>
-      <div class="modal-child-card" id="modalChildCard">
-        <div class="child-title">🌈 Dla malucha 🧒</div>
-        <div class="child-text" id="modalChildText"></div>
-        <button class="btn-read-child" id="modalChildRead" onclick="speakChildDesc(null, null, 'modal')">📖 Przeczytaj</button>
+      <div class="audience-tabs" id="modal-aud-tabs">
+        <button class="aud-tab active" onclick="loadModalAudienceDesc('przedszkolak')">🧒 Maluch</button>
+        <button class="aud-tab" onclick="loadModalAudienceDesc('szkolny')">📚 Szkoła</button>
+        <button class="aud-tab" onclick="loadModalAudienceDesc('dorosly')">🔬 Dorosły</button>
+      </div>
+      <div class="desc-box" id="modal-desc-box">
+        <div class="desc-text" id="modal-desc-text">Wybierz grupę wiekową ▲</div>
+        <button class="desc-speak-btn" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj</button>
       </div>
     </div>
   </div>
@@ -1182,6 +1185,7 @@ function renderCards() {
     card.dataset.idx = idx;
     card.style.animationDelay = `${idx * 0.06}s`;
 
+    card.setAttribute('onclick', `openModal(${bird.rank})`);
     card.innerHTML = `
       <div class="card-img-wrap">
         <div class="card-emoji-fallback" id="emoji-${bird.rank}">${bird.emoji}</div>
@@ -1199,21 +1203,6 @@ function renderCards() {
       <div class="card-body">
         <div class="card-name">${bird.name}</div>
         <div class="card-latin">${bird.latin}</div>
-        <div class="card-desc">${bird.teaser}</div>
-        <div class="card-actions">
-          <button class="btn btn-sound" id="snd-${bird.rank}" onclick="playSound(event, ${bird.rank})">🔊 Posłuchaj</button>
-          <button class="btn btn-tts" id="tts-${bird.rank}" onclick="speakCard(event, ${bird.rank})">📖 Czytaj</button>
-          <button class="btn btn-more" onclick="openModal(${bird.rank})">🔍 Więcej</button>
-        </div>
-        <div class="audience-tabs" id="aud-tabs-${bird.rank}">
-          <button class="aud-tab active" onclick="loadAudienceDesc(event,${bird.rank},'przedszkolak')">🧒 Maluch</button>
-          <button class="aud-tab" onclick="loadAudienceDesc(event,${bird.rank},'szkolny')">📚 Szkoła</button>
-          <button class="aud-tab" onclick="loadAudienceDesc(event,${bird.rank},'dorosly')">🔬 Dorosły</button>
-        </div>
-        <div class="desc-box" id="desc-box-${bird.rank}">
-          <div class="desc-text" id="desc-text-${bird.rank}">Wybierz grupę wiekową ▲</div>
-          <button class="desc-speak-btn" id="desc-speak-${bird.rank}" onclick="speakAudienceDesc(${bird.rank})">🔊 Czytaj</button>
-        </div>
       </div>`;
     grid.appendChild(card);
   });
@@ -1374,29 +1363,16 @@ function openModal(rank) {
   `;
 
   // Reset buttons
-  document.getElementById('modalSoundBtn').innerHTML = '🔊 Odtwórz głos';
+  document.getElementById('modalSoundBtn').innerHTML = '🔊 Posłuchaj ptaka';
   document.getElementById('modalSoundBtn').disabled = false;
   document.getElementById('modalSoundBtn').classList.remove('playing');
   document.getElementById('modalTtsBtn').innerHTML = '📖 Przeczytaj głośno';
 
-  // Reset child card — pre-populate if cached
-  const modalChildCard = document.getElementById('modalChildCard');
-  const modalChildBtn = document.getElementById('modalChildBtn');
-  const modalChildText = document.getElementById('modalChildText');
-  modalChildBtn.innerHTML = '🧒 Dla malucha';
-  modalChildBtn.disabled = false;
-  modalChildBtn.classList.remove('loaded');
-  modalChildBtn.onclick = (e) => loadChildDesc(e, null, 'modal');
-  if (childDescCache[bird.name]) {
-    modalChildText.textContent = childDescCache[bird.name];
-    modalChildCard.style.display = 'block';
-    modalChildBtn.innerHTML = '📖 Przeczytaj';
-    modalChildBtn.classList.add('loaded');
-    modalChildBtn.onclick = (e) => speakChildDesc(e, null, 'modal');
-  } else {
-    modalChildCard.style.display = 'none';
-    modalChildText.textContent = '';
-  }
+  // Reset audience desc
+  document.getElementById('modal-desc-text').textContent = 'Wybierz grupę wiekową ▲';
+  document.getElementById('modal-desc-speak').style.display = 'none';
+  document.querySelectorAll('#modal-aud-tabs .aud-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+  modalCurrentAudience = { audience: null, text: null };
 
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1616,6 +1592,7 @@ renderCards();
 const audienceDescCache = {}; // key: `${rank}-${audience}`
 const audienceAudioCache = {};
 let currentAudienceDesc = {}; // rank -> { audience, text }
+let modalCurrentAudience = { audience: null, text: null };
 
 async function loadAudienceDesc(event, rank, audience) {
   if (event) event.stopPropagation();
@@ -1690,6 +1667,73 @@ async function speakAudienceDesc(rank) {
       new Audio(data.url).play();
     }
   } catch { }
+  btn.textContent = '🔊 Czytaj';
+}
+
+async function loadModalAudienceDesc(audience) {
+  if (!activeBird) return;
+
+  document.querySelectorAll('#modal-aud-tabs .aud-tab').forEach((t, i) => {
+    const auds = ['przedszkolak', 'szkolny', 'dorosly'];
+    t.classList.toggle('active', auds[i] === audience);
+  });
+
+  const textEl = document.getElementById('modal-desc-text');
+  const speakBtn = document.getElementById('modal-desc-speak');
+  const cacheKey = `${activeBird.rank}-${audience}`;
+
+  if (audienceDescCache[cacheKey]) {
+    textEl.textContent = audienceDescCache[cacheKey];
+    modalCurrentAudience = { audience, text: audienceDescCache[cacheKey] };
+    speakBtn.style.display = 'inline-block';
+    return;
+  }
+
+  textEl.textContent = '⏳ Generuję opis...';
+  speakBtn.style.display = 'none';
+
+  const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-describe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ birdName: activeBird.name, latinName: activeBird.latin, audience })
+    });
+    const data = await res.json();
+    const text = data.description || 'Opis niedostępny.';
+    audienceDescCache[cacheKey] = text;
+    modalCurrentAudience = { audience, text };
+    textEl.textContent = text;
+    speakBtn.style.display = 'inline-block';
+  } catch {
+    textEl.textContent = 'Nie udało się wczytać opisu.';
+  }
+}
+
+async function speakModalAudienceDesc() {
+  if (!activeBird || !modalCurrentAudience.text) return;
+  const btn = document.getElementById('modal-desc-speak');
+  const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
+  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
+
+  const cacheKey = `${activeBird.rank}-${modalCurrentAudience.audience}`;
+  if (audienceAudioCache[cacheKey]) {
+    new Audio(audienceAudioCache[cacheKey]).play();
+    return;
+  }
+
+  btn.textContent = '⏳';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ birdName: activeBird.name, text: modalCurrentAudience.text, audience: modalCurrentAudience.audience })
+    });
+    const data = await res.json();
+    if (data.url) { audienceAudioCache[cacheKey] = data.url; new Audio(data.url).play(); }
+  } catch {}
   btn.textContent = '🔊 Czytaj';
 }
 </script>
