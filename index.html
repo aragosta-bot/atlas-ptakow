@@ -1722,19 +1722,14 @@ async function speakModalAudienceDesc() {
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
-    // Preload — next click will play from cache synchronously
     _sharedAudio.src = audioUrl;
     _sharedAudio.load();
+    await _sharedAudio.play();
+    btn.textContent = '⏹ Stop';
+    _sharedAudio.onended = () => { btn.textContent = '🔊 Czytaj opis'; btn.disabled = false; };
   } catch(e) { console.warn('TTS error:', e); }
   btn.disabled = false;
-  btn.textContent = '▶ Odtwórz';
-  // Now trigger click simulation — user is still in gesture context? No on iOS.
-  // So we just mark as ready and let next click play
-  btn.onclick = () => {
-    _sharedAudio.play().catch(e => console.warn('play:', e));
-    btn.textContent = '🔊 Gra...';
-    _sharedAudio.onended = () => { btn.textContent = '▶ Odtwórz'; };
-  };
+  if (btn.textContent === '⏳ Ładuję...') btn.textContent = '🔊 Czytaj opis';
 }
 
 // Shared persistent audio element — avoids autoplay policy issues
