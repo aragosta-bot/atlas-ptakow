@@ -1905,10 +1905,17 @@ async function speakModalAudienceDesc() {
   const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
 
   const cacheKey = `${activeBird.rank}-${modalCurrentAudience.audience}`;
+
+  // If cached — play immediately (synchronous user gesture context preserved)
   if (audienceAudioCache[cacheKey]) {
     playDataUrl(audienceAudioCache[cacheKey]);
     return;
   }
+
+  // Not cached — start play() immediately to preserve user gesture, then load data
+  // iOS requires play() in synchronous user gesture handler
+  _sharedAudio.src = '';
+  const playIntent = _sharedAudio.play().catch(() => {});
 
   btn.textContent = '⏳';
   try {
@@ -1918,24 +1925,29 @@ async function speakModalAudienceDesc() {
       body: JSON.stringify({ birdName: activeBird.name, text: modalCurrentAudience.text, audience: modalCurrentAudience.audience })
     });
     const data = await res.json();
-    if (data.url) { audienceAudioCache[cacheKey] = data.url; playDataUrl(data.url); }
-  } catch {}
+    if (data.url) {
+      audienceAudioCache[cacheKey] = data.url;
+      _sharedAudio.pause();
+      _sharedAudio.src = data.url;
+      _sharedAudio.load();
+      _sharedAudio.play().catch(e => console.warn('play error:', e));
+    }
+  } catch(e) { console.warn('TTS error:', e); }
   btn.textContent = '🔊 Czytaj';
 }
 
+// Shared persistent audio element — avoids autoplay policy issues
+const _sharedAudio = document.createElement('audio');
+_sharedAudio.preload = 'none';
+document.body.appendChild(_sharedAudio);
+
 function playDataUrl(dataUrl) {
   try {
-    // Convert data URL to Blob for better mobile compatibility
-    const parts = dataUrl.split(',');
-    const mime = parts[0].match(/:(.*?);/)[1];
-    const binary = atob(parts[1]);
-    const arr = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) arr[i] = binary.charCodeAt(i);
-    const blob = new Blob([arr], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.onended = () => URL.revokeObjectURL(url);
-    audio.play().catch(e => console.warn('Audio play failed:', e));
+    _sharedAudio.pause();
+    _sharedAudio.src = dataUrl;
+    _sharedAudio.load();
+    const playPromise = _sharedAudio.play();
+    if (playPromise) playPromise.catch(e => console.warn('Audio play failed:', e));
   } catch(e) {
     console.warn('playDataUrl error:', e);
   }
