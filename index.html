@@ -1738,8 +1738,8 @@ async function speakModalAudienceDesc() {
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('audio')) {
       const errText = await res.text();
-      console.error('TTS returned non-audio:', contentType, errText.slice(0,200));
-      if (player) player.innerHTML = '<div style="color:red;font-size:0.85rem;padding:4px">Błąd generowania audio</div>';
+      alert('TTS non-audio response: ' + contentType + ' | ' + errText.slice(0,200));
+      if (player) player.innerHTML = '<div style="color:red;font-size:0.85rem;padding:4px">Błąd: ' + contentType + '</div>';
       return;
     }
     const blob = await res.blob();
