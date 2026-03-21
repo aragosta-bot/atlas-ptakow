@@ -1251,12 +1251,8 @@ function renderCards() {
 
   grid.querySelectorAll('.card').forEach(c => observer.observe(c));
 
-  // Load photos sequentially to avoid throttling
-  (async () => {
-    for (const bird of list) {
-      await loadBirdPhoto(bird.rank, bird.latin);
-    }
-  })();
+  // Load photos with small stagger — sequential was blocking rerender
+  list.forEach((bird, idx) => setTimeout(() => loadBirdPhoto(bird.rank, bird.latin), idx * 200));
 }
 
 // ===== PHOTO LOADER =====
@@ -1318,7 +1314,6 @@ async function playSound(event, rank) {
     const audioUrl = soundData.url;
 
     currentAudio = new Audio(audioUrl);
-    currentAudio.crossOrigin = 'anonymous';
 
     currentAudio.onended = () => {
       btn.classList.remove('playing');
@@ -1717,10 +1712,10 @@ async function speakModalAudienceDesc() {
 
   // If cached — inject native audio player
   if (audienceAudioCache[cacheKey]) {
-    if (player) {
-      player.innerHTML = `<audio controls src="${audienceAudioCache[cacheKey]}" style="width:100%;margin-top:4px"></audio>`;
-      player.style.display = 'block';
-    }
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    currentAudio = new Audio(audienceAudioCache[cacheKey]);
+    currentAudio.play().catch(e => console.warn('TTS cached play:', e));
+    currentAudio.onended = () => { currentAudio = null; };
     return;
   }
 
@@ -1741,16 +1736,12 @@ async function speakModalAudienceDesc() {
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
-    if (player) {
-      player.innerHTML = '';
-      const audioEl = document.createElement('audio');
-      audioEl.controls = true;
-      audioEl.style.width = '100%';
-      audioEl.style.marginTop = '4px';
-      audioEl.src = audioUrl;
-      player.appendChild(audioEl);
-      player.style.display = 'block';
-    }
+    // Play directly like Xeno-canto — no visible player
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    currentAudio = new Audio(audioUrl);
+    currentAudio.play().catch(e => console.warn('TTS play error:', e));
+    currentAudio.onended = () => { currentAudio = null; };
+    if (player) player.style.display = 'none';
   } catch(e) {
     console.warn('TTS error:', e);
     if (player) player.innerHTML = '<div style="color:red">Błąd: ' + e.message + '</div>';
