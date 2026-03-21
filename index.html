@@ -859,7 +859,8 @@ const habitatConfig = {
 // ===== STATE =====
 let currentHabitat = 'all';
 let currentSearch  = '';
-let currentAudio   = null;
+let currentAudio   = null; // TTS audio
+let birdSoundAudio = null; // Xeno-canto bird sounds
 let currentSpeech  = null;
 let activeBird     = null;
 let isSpeaking     = false;
@@ -1055,7 +1056,7 @@ async function playSound(event, rank) {
       currentAudio = null;
     };
 
-    await currentAudio.play();
+    await birdSoundAudio.play();
     btn.disabled = false;
     btn.classList.add('playing');
     btn.innerHTML = '⏹️ Stop';
@@ -1239,10 +1240,10 @@ async function playModalSound() {
   const btn = document.getElementById('modalSoundBtn');
   if (!activeBird) return;
 
-  if (currentAudio && !currentAudio.paused) {
-    currentAudio.pause(); currentAudio = null;
+  if (birdSoundAudio && !birdSoundAudio.paused) {
+    birdSoundAudio.pause(); birdSoundAudio = null;
     btn.classList.remove('playing');
-    btn.innerHTML = '🔊 Odtwórz głos';
+    btn.innerHTML = '🔊 Posłuchaj ptaka';
     return;
   }
 
@@ -1262,11 +1263,11 @@ async function playModalSound() {
     if (!soundData.url) throw new Error('no recording');
     const audioUrl = soundData.url;
 
-    currentAudio = new Audio(audioUrl);
-    currentAudio.onended = () => {
+    birdSoundAudio = new Audio(audioUrl);
+    birdSoundAudio.onended = () => {
       btn.classList.remove('playing');
-      btn.innerHTML = '🔊 Odtwórz głos';
-      currentAudio = null;
+      btn.innerHTML = '🔊 Posłuchaj ptaka';
+      birdSoundAudio = null;
     };
     currentAudio.onerror = () => {
       btn.classList.remove('playing');
@@ -1312,6 +1313,8 @@ document.addEventListener('keydown', (e) => {
 
 // ===== INIT =====
 initFlyingBirds();
+// Show loading until birds.json is ready
+document.getElementById('birdsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888">⏳ Ładowanie ptaków...</div>';
 
 const audienceDescCache = {}; // key: `${rank}-${audience}`
 const audienceAudioCache = {};
