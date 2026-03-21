@@ -1269,13 +1269,13 @@ async function playModalSound() {
       btn.innerHTML = '🔊 Posłuchaj ptaka';
       birdSoundAudio = null;
     };
-    currentAudio.onerror = () => {
+    birdSoundAudio.onerror = () => {
       btn.classList.remove('playing');
       btn.innerHTML = '❌ Brak nagrania';
-      currentAudio = null;
+      birdSoundAudio = null;
     };
 
-    await currentAudio.play();
+    await birdSoundAudio.play();
     btn.disabled = false;
     btn.classList.add('playing');
     btn.innerHTML = '⏹️ Zatrzymaj';
