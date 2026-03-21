@@ -10,7 +10,6 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
 
   const { latinName } = await req.json()
-  
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
   // Check cache
@@ -28,25 +27,28 @@ serve(async (req) => {
     })
   }
 
-  // Fetch from Xeno-canto v3
+  // Fetch from Xeno-canto v3 — get more results to find MP3
   const xcKey = Deno.env.get('XENOCANTO_API_KEY')!
   const query = encodeURIComponent(`sp:"${latinName}"`)
   const res = await fetch(
-    `https://xeno-canto.org/api/3/recordings?query=${query}&per_page=1&key=${xcKey}`,
+    `https://xeno-canto.org/api/3/recordings?query=${query}&per_page=50&key=${xcKey}`,
     { headers: { 'User-Agent': 'AtlasPtakow/1.0 educational' } }
   )
   const data = await res.json()
   const recordings = data.recordings || []
-  
+
   if (recordings.length === 0) {
     return new Response(JSON.stringify({ url: null, error: 'no recordings' }), {
       headers: { ...cors, 'Content-Type': 'application/json' }
     })
   }
 
-  const soundUrl = recordings[0].file
-  
-  // Cache it (reuse photo_url column for sound URL, audience='sound')
+  // Prefer MP3 over WAV
+  const mp3 = recordings.find((r: any) => r['file-name']?.toLowerCase().endsWith('.mp3'))
+  const chosen = mp3 || recordings[0]
+  const soundUrl = chosen.file
+
+  // Cache
   await supabase.from('bird_content').upsert(
     { bird_name: latinName, latin_name: latinName, audience: 'sound', photo_url: soundUrl, description: '' },
     { onConflict: 'bird_name,audience' }
