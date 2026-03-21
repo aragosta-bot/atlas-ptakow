@@ -796,7 +796,7 @@
       <!-- Action buttons -->
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
-        <button class="btn btn-tts" id="modal-desc-speak" onclick="alert('activeBird:' + (activeBird?.name||'null') + ' text:' + (modalCurrentAudience?.text?.slice(0,20)||'null')); speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
+        <button class="btn btn-tts" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
         <div id="modal-audio-player" style="display:none; margin-top:8px"></div>
       </div>
     </div>
@@ -1706,9 +1706,7 @@ async function loadModalAudienceDesc(audience) {
 }
 
 async function speakModalAudienceDesc() {
-  console.log('speakModalAudienceDesc called', {activeBird: activeBird?.name, text: modalCurrentAudience?.text?.slice(0,30)});
   if (!activeBird || !modalCurrentAudience.text) {
-    alert('EARLY RETURN: activeBird=' + !!activeBird + ' text=' + !!modalCurrentAudience?.text + ' audience=' + modalCurrentAudience?.audience);
     return;
   }
   const player = document.getElementById('modal-audio-player');
@@ -1726,7 +1724,6 @@ async function speakModalAudienceDesc() {
     return;
   }
 
-  console.log("TTS player element:", player, "visible:", player?.style.display);
   if (player) { player.style.display = "block"; player.innerHTML = '<div style="color:#888;font-size:0.85rem;margin-top:4px">⏳ Generuję audio...</div>'; }
 
   try {
@@ -1738,7 +1735,6 @@ async function speakModalAudienceDesc() {
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('audio')) {
       const errText = await res.text();
-      alert('TTS non-audio response: ' + contentType + ' | ' + errText.slice(0,200));
       if (player) player.innerHTML = '<div style="color:red;font-size:0.85rem;padding:4px">Błąd: ' + contentType + '</div>';
       return;
     }
@@ -1756,7 +1752,6 @@ async function speakModalAudienceDesc() {
       player.style.display = 'block';
     }
   } catch(e) {
-    alert('TTS ERROR: ' + e.message);
     console.warn('TTS error:', e);
     if (player) player.innerHTML = '<div style="color:red">Błąd: ' + e.message + '</div>';
   }
