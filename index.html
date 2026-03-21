@@ -870,13 +870,7 @@ const birds = [
   { rank: 32, name: "Kruk", latin: "Corvus corax", emoji: "🐦‍⬛", habitat: "las", teaser: "Największy ptak krukowaty w Polsce.", xenoQuery: "Corvus+corax+cnt:Poland", coverPhoto: "https://inaturalist-open-data.s3.amazonaws.com/photos/54389687/medium.jpg" },
   { rank: 33, name: "Orzeł bielik", latin: "Haliaeetus albicilla", emoji: "🦅", habitat: "woda", teaser: "Największy orzeł w Polsce — ptak narodowy!", xenoQuery: "Haliaeetus+albicilla+cnt:Poland", coverPhoto: "https://inaturalist-open-data.s3.amazonaws.com/photos/164904961/medium.jpg" }
 ];
-async function loadBirdsData() {
-  const res = await fetch('birds.json');
-  const data = await res.json();
-  birds.push(...data);
-  renderCards();
-}
-loadBirdsData();
+// birds data loaded inline
 
 // ===== HABITAT CONFIG =====
 const habitatConfig = {
@@ -973,10 +967,10 @@ function renderCards() {
         <div class="card-emoji-fallback" id="emoji-${bird.rank}">${bird.emoji}</div>
         <img
           id="photo-${bird.rank}"
-          src=""
+          src="${bird.coverPhoto || ''}"
           alt="${bird.name}"
           loading="lazy"
-          style="display:none"
+          style="${bird.coverPhoto ? '' : 'display:none'}"
           onload="this.style.display='block'; document.getElementById('emoji-${bird.rank}').style.display='none';"
           onerror="this.style.display='none';"
         />
