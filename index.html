@@ -796,6 +796,7 @@
       <!-- Action buttons -->
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
+        <button class="btn btn-tts" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
         <div id="modal-audio-player" style="display:none; margin-top:8px"></div>
       </div>
     </div>
@@ -1485,6 +1486,7 @@ function openModal(rank) {
   // Reset audience desc
   document.getElementById('modal-desc-text').textContent = '';
   const ap = document.getElementById('modal-audio-player'); if(ap) { ap.style.display='none'; ap.innerHTML=''; }
+  const sb = document.getElementById('modal-desc-speak'); if(sb) sb.style.display='none';
   const ffEl = document.getElementById('modal-fun-fact');
   if (ffEl) ffEl.style.display = 'none';
   document.querySelectorAll('#modal-aud-tabs .modal-aud-tab').forEach(t => t.classList.remove('active'));
@@ -1612,6 +1614,7 @@ async function loadAudienceDesc(event, rank, audience) {
     textEl.textContent = audienceDescCache[cacheKey];
     currentAudienceDesc[rank].text = audienceDescCache[cacheKey];
     if (audioPlayer) audioPlayer.style.display = 'block';
+    const sb = document.getElementById('modal-desc-speak'); if(sb) sb.style.display='inline-block';
     return;
   }
 
@@ -1632,6 +1635,7 @@ async function loadAudienceDesc(event, rank, audience) {
     currentAudienceDesc[rank] = { audience, text };
     textEl.textContent = text;
     if (audioPlayer) audioPlayer.style.display = 'block';
+    const sb = document.getElementById('modal-desc-speak'); if(sb) sb.style.display='inline-block';
   } catch {
     textEl.textContent = 'Nie udało się wczytać opisu.';
   }
@@ -1654,6 +1658,7 @@ async function loadModalAudienceDesc(audience) {
     textEl.textContent = cached.text;
     modalCurrentAudience = { audience, text: cached.text };
     if (audioPlayer) audioPlayer.style.display = 'block';
+    const sb = document.getElementById('modal-desc-speak'); if(sb) sb.style.display='inline-block';
     const funFactEl = document.getElementById('modal-fun-fact');
     const funFactTextEl = document.getElementById('modal-fun-fact-text');
     if (cached.fun_fact && funFactEl && funFactTextEl) {
@@ -1683,6 +1688,7 @@ async function loadModalAudienceDesc(audience) {
     modalCurrentAudience = { audience, text };
     textEl.textContent = text;
     if (audioPlayer) audioPlayer.style.display = 'block';
+    const sb = document.getElementById('modal-desc-speak'); if(sb) sb.style.display='inline-block';
     // Show fun fact if present
     const funFactEl = document.getElementById('modal-fun-fact');
     const funFactTextEl = document.getElementById('modal-fun-fact-text');
