@@ -1726,7 +1726,8 @@ async function speakModalAudienceDesc() {
     return;
   }
 
-  if (player) player.innerHTML = '<div style="color:#888;font-size:0.85rem;margin-top:4px">⏳ Generuję audio...</div>';
+  console.log("TTS player element:", player, "visible:", player?.style.display);
+  if (player) { player.style.display = "block"; player.innerHTML = '<div style="color:#888;font-size:0.85rem;margin-top:4px">⏳ Generuję audio...</div>'; }
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/bird-tts`, {
