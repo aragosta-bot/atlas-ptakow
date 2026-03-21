@@ -723,7 +723,9 @@
     }
     .scroll-top.visible { opacity: 1; pointer-events: all; }
     .scroll-top:hover { transform: scale(1.1); }
-  .card-name-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .modal-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.modal-title-row .modal-title { margin: 0; }
+.card-name-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .btn-name-speak { background: none; border: 1px solid #ccc; border-radius: 50%; width: 32px; height: 32px; padding: 0; font-size: 0.9rem; cursor: pointer; flex-shrink: 0; }
 .btn-name-speak:hover { background: #f0f0f0; }
 </style>
@@ -779,7 +781,10 @@
     <div class="modal-body">
       <!-- Badges and name -->
       <div class="modal-meta" id="modalMeta"></div>
-      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-title-row">
+          <h2 class="modal-title" id="modalTitle"></h2>
+          <button class="btn-name-speak" id="modalNameSpeak" onclick="speakActiveBirdName()" title="Wymów nazwę">🔈</button>
+        </div>
       <p class="modal-latin" id="modalLatin"></p>
 
       <!-- Audience tabs — large, prominent -->
@@ -979,10 +984,7 @@ function renderCards() {
         <span class="rank-badge">⭐ #${bird.rank}</span>
       </div>
       <div class="card-body">
-        <div class="card-name-row">
-          <div class="card-name">${bird.name}</div>
-          <button class="btn-name-speak" onclick="speakBirdName(event, '${bird.name}')" title="Wymów nazwę">🔈</button>
-        </div>
+        <div class="card-name">${bird.name}</div>
         <div class="card-latin">${bird.latin}</div>
       </div>`;
     grid.appendChild(card);
@@ -1518,6 +1520,18 @@ function playDataUrl(url) {
     _sharedAudio.play().catch(e => console.warn('Audio play failed:', e));
   } catch(e) {
     console.warn('playDataUrl error:', e);
+  }
+}
+
+
+function speakActiveBirdName() {
+  if (!activeBird) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(activeBird.name);
+    u.lang = 'pl-PL';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
   }
 }
 
