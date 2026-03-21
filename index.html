@@ -1704,7 +1704,11 @@ async function loadModalAudienceDesc(audience) {
 }
 
 async function speakModalAudienceDesc() {
-  if (!activeBird || !modalCurrentAudience.text) return;
+  console.log('speakModalAudienceDesc called', {activeBird: activeBird?.name, text: modalCurrentAudience?.text?.slice(0,30)});
+  if (!activeBird || !modalCurrentAudience.text) {
+    console.warn('EARLY RETURN — activeBird:', !!activeBird, 'text:', !!modalCurrentAudience.text);
+    return;
+  }
   const player = document.getElementById('modal-audio-player');
   const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
   const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
