@@ -8,7 +8,6 @@ const cors = {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
-
   try {
     const { birdName, text, audience } = await req.json()
     const aud = audience || 'dorosly'
@@ -27,21 +26,23 @@ serve(async (req) => {
       .maybeSingle()
 
     if (cached?.audio_url) {
-      // Return audio directly as binary response
-      const base64 = cached.audio_url.split(',')[1]
-      const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0))
-      return new Response(binary, {
-        headers: {
-          ...cors,
-          'Content-Type': 'audio/mpeg',
-          'Cache-Control': 'public, max-age=86400',
-        }
+      // Decode base64 in chunks to avoid stack overflow
+      const dataUrl = cached.audio_url
+      const base64 = dataUrl.split(',')[1]
+      const binaryStr = atob(base64)
+      const len = binaryStr.length
+      const bytes = new Uint8Array(len)
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i)
+      }
+      return new Response(bytes.buffer, {
+        headers: { ...cors, 'Content-Type': 'audio/mpeg', 'Cache-Control': 'public, max-age=86400' }
       })
     }
 
     // Generate with ElevenLabs
     const elevenKey = Deno.env.get('ELEVENLABS_API_KEY')!
-    const voiceId = 'd4Z5Fvjohw3zxGpV8XUV' // Maria
+    const voiceId = 'd4Z5Fvjohw3zxGpV8XUV'
 
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: 'POST',
@@ -58,21 +59,19 @@ serve(async (req) => {
     const buf = await response.arrayBuffer()
 
     // Cache as base64
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)))
+    const bytes = new Uint8Array(buf)
+    let binary = ''
+    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+    const base64 = btoa(binary)
     const dataUrl = `data:audio/mpeg;base64,${base64}`
 
-    await supabase.from('bird_audio').upsert(
+    supabase.from('bird_audio').upsert(
       { bird_name: birdName, audience: aud, audio_url: dataUrl },
       { onConflict: 'bird_name,audience' }
-    )
+    ).then(() => {}).catch(() => {})
 
-    // Return audio directly as binary
     return new Response(buf, {
-      headers: {
-        ...cors,
-        'Content-Type': 'audio/mpeg',
-        'Cache-Control': 'public, max-age=86400',
-      }
+      headers: { ...cors, 'Content-Type': 'audio/mpeg', 'Cache-Control': 'public, max-age=86400' }
     })
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), {
