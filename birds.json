@@ -7,7 +7,8 @@
     "habitat": "miasto",
     "teaser": "Najpopularniejszy ptak w Polsce! Mieszka blisko ludzi.",
     "xenoQuery": "Passer+domesticus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/4608133/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/4608133/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089317/download"
   },
   {
     "rank": 2,
@@ -17,7 +18,8 @@
     "habitat": "las",
     "teaser": "Żółty brzuszek i czarna czapeczka — nie pomylisz jej z nikim!",
     "xenoQuery": "Parus+major+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/340613122/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/340613122/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1088818/download"
   },
   {
     "rank": 3,
@@ -27,7 +29,8 @@
     "habitat": "las",
     "teaser": "Ptak z pomarańczową piersią. Śpiewa nawet zimą!",
     "xenoQuery": "Erithacus+rubecula+cnt:Poland",
-    "coverPhoto": "https://static.inaturalist.org/photos/331946615/medium.jpeg"
+    "coverPhoto": "https://static.inaturalist.org/photos/331946615/medium.jpeg",
+    "soundUrl": "https://xeno-canto.org/1089386/download"
   },
   {
     "rank": 4,
@@ -37,7 +40,8 @@
     "habitat": "miasto",
     "teaser": "Czarny ptak z żółtym dziobem i cudnym śpiewem.",
     "xenoQuery": "Turdus+merula+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/356885346/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/356885346/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089302/download"
   },
   {
     "rank": 5,
@@ -47,7 +51,8 @@
     "habitat": "miasto",
     "teaser": "Błyszczące pióra i świetny naśladowca dźwięków!",
     "xenoQuery": "Sturnus+vulgaris+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/32152001/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/32152001/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089486/download"
   },
   {
     "rank": 6,
@@ -57,7 +62,8 @@
     "habitat": "miasto",
     "teaser": "Mistrz lotu! Przylatuje z Afryki każdej wiosny.",
     "xenoQuery": "Hirundo+rustica+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/122469139/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/122469139/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1029127/download"
   },
   {
     "rank": 7,
@@ -67,7 +73,8 @@
     "habitat": "pole",
     "teaser": "Symbol Polski! Przynosi szczęście do domu.",
     "xenoQuery": "Ciconia+ciconia+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/62738914/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/62738914/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1041542/download"
   },
   {
     "rank": 8,
@@ -77,7 +84,8 @@
     "habitat": "las",
     "teaser": "Ku-ku! Jej głos to znak, że przyszła wiosna.",
     "xenoQuery": "Cuculus+canorus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/380547488/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/380547488/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1079919/download"
   },
   {
     "rank": 9,
@@ -87,7 +95,8 @@
     "habitat": "las",
     "teaser": "Puk-puk-puk! Słyszysz w lesie? To dzięcioł!",
     "xenoQuery": "Dendrocopos+major+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/259132621/medium.jpeg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/259132621/medium.jpeg",
+    "soundUrl": "https://xeno-canto.org/1088137/download"
   },
   {
     "rank": 10,
@@ -97,7 +106,8 @@
     "habitat": "las",
     "teaser": "Kolorowy ptak leśny z różową piersią.",
     "xenoQuery": "Fringilla+coelebs+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/151143058/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/151143058/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089321/download"
   },
   {
     "rank": 11,
@@ -107,7 +117,8 @@
     "habitat": "las",
     "teaser": "Nocny łowca z puszystymi uszkami na głowie.",
     "xenoQuery": "Asio+otus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/5651/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/5651/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089265/download"
   },
   {
     "rank": 12,
@@ -117,7 +128,8 @@
     "habitat": "las",
     "teaser": "Whooo! Puszczyk straszy nocą w starych lasach.",
     "xenoQuery": "Strix+aluco+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/451350360/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/451350360/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089416/download"
   },
   {
     "rank": 13,
@@ -127,7 +139,8 @@
     "habitat": "las",
     "teaser": "Szybki drapieżnik leśny. Prawdziwy pilot myśliwski!",
     "xenoQuery": "Accipiter+gentilis+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/61773674/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/61773674/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/978938/download"
   },
   {
     "rank": 14,
@@ -137,7 +150,8 @@
     "habitat": "pole",
     "teaser": "Siedzi na słupach i poluje na myszy na polach.",
     "xenoQuery": "Buteo+buteo+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/28307358/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/28307358/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1052241/download"
   },
   {
     "rank": 15,
@@ -147,7 +161,8 @@
     "habitat": "pole",
     "teaser": "Kolorowy jak tęcza! Żyje na polach i w zaroślach.",
     "xenoQuery": "Phasianus+colchicus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/176733796/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/176733796/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1067618/download"
   },
   {
     "rank": 16,
@@ -157,7 +172,8 @@
     "habitat": "woda",
     "teaser": "Biały jak śnieg. Najpiękniejszy ptak na wodzie!",
     "xenoQuery": "Cygnus+olor+cnt:Poland",
-    "coverPhoto": "https://static.inaturalist.org/photos/264781420/medium.jpg"
+    "coverPhoto": "https://static.inaturalist.org/photos/264781420/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1075288/download"
   },
   {
     "rank": 17,
@@ -167,7 +183,8 @@
     "habitat": "woda",
     "teaser": "Kwa-kwa! Najpopularniejsza kaczka w Polsce.",
     "xenoQuery": "Anas+platyrhynchos+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/95268822/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/95268822/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1035831/download"
   },
   {
     "rank": 18,
@@ -177,7 +194,8 @@
     "habitat": "woda",
     "teaser": "Wysoka i cierpliwa. Stoi godzinami czekając na rybę.",
     "xenoQuery": "Ardea+cinerea+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/73516715/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/73516715/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1045046/download"
   },
   {
     "rank": 19,
@@ -187,7 +205,8 @@
     "habitat": "miasto",
     "teaser": "Czarno-biała i ciągle kiwa ogonem!",
     "xenoQuery": "Motacilla+alba+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/39786089/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/39786089/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1088882/download"
   },
   {
     "rank": 20,
@@ -197,7 +216,8 @@
     "habitat": "miasto",
     "teaser": "Kuzyn wróbla z brązową czapeczką i czarną plamką.",
     "xenoQuery": "Passer+montanus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/473342977/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/473342977/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1083079/download"
   },
   {
     "rank": 21,
@@ -207,7 +227,8 @@
     "habitat": "las",
     "teaser": "Niebieska czapeczka i żółty brzuszek. Akrobata gałęzi!",
     "xenoQuery": "Cyanistes+caeruleus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/41677354/medium.jpeg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/41677354/medium.jpeg",
+    "soundUrl": "https://xeno-canto.org/1089568/download"
   },
   {
     "rank": 22,
@@ -217,7 +238,8 @@
     "habitat": "miasto",
     "teaser": "Głośny i mądry. Buduje miasto z gniazd na drzewach!",
     "xenoQuery": "Corvus+frugilegus+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/62108568/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/62108568/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1027532/download"
   },
   {
     "rank": 23,
@@ -227,7 +249,8 @@
     "habitat": "miasto",
     "teaser": "Czarno-szara i bardzo mądra. Mieszka w miastach.",
     "xenoQuery": "Corvus+cornix+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/114176979/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/114176979/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1080421/download"
   },
   {
     "rank": 24,
@@ -237,7 +260,8 @@
     "habitat": "las",
     "teaser": "Kolorowa jak papuga i głośna jak alarm leśny!",
     "xenoQuery": "Garrulus+glandarius+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/168146456/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/168146456/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089334/download"
   },
   {
     "rank": 25,
@@ -247,7 +271,8 @@
     "habitat": "las",
     "teaser": "Chodzi po pniach drzew do góry nogami!",
     "xenoQuery": "Sitta+europaea+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/98789726/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/98789726/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1088200/download"
   },
   {
     "rank": 26,
@@ -257,7 +282,8 @@
     "habitat": "las",
     "teaser": "'Cip-cap, cip-cap' — pierwszy głos wiosny!",
     "xenoQuery": "Phylloscopus+collybita+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/232289336/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/232289336/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1089330/download"
   },
   {
     "rank": 27,
@@ -267,7 +293,8 @@
     "habitat": "las",
     "teaser": "Wspina się po pniach jak mała myszka z dziobem!",
     "xenoQuery": "Certhia+familiaris+cnt:Poland",
-    "coverPhoto": "https://static.inaturalist.org/photos/29333045/medium.jpeg"
+    "coverPhoto": "https://static.inaturalist.org/photos/29333045/medium.jpeg",
+    "soundUrl": "https://xeno-canto.org/1089274/download"
   },
   {
     "rank": 28,
@@ -277,7 +304,8 @@
     "habitat": "miasto",
     "teaser": "Ruda kitka ciągle się trzęsie. Mieszka na dachach!",
     "xenoQuery": "Phoenicurus+ochruros+cnt:Poland",
-    "coverPhoto": "https://static.inaturalist.org/photos/120990680/medium.jpeg"
+    "coverPhoto": "https://static.inaturalist.org/photos/120990680/medium.jpeg",
+    "soundUrl": "https://xeno-canto.org/1059037/download"
   },
   {
     "rank": 29,
@@ -287,7 +315,8 @@
     "habitat": "las",
     "teaser": "Samiec ma różowo-czerwony brzuszek jak jabłko!",
     "xenoQuery": "Pyrrhula+pyrrhula+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/12714/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/12714/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1077468/download"
   },
   {
     "rank": 30,
@@ -297,7 +326,8 @@
     "habitat": "las",
     "teaser": "Zielono-żółty ptak z głośnym śpiewem.",
     "xenoQuery": "Chloris+chloris+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/43705228/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/43705228/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1051122/download"
   },
   {
     "rank": 31,
@@ -307,7 +337,8 @@
     "habitat": "las",
     "teaser": "Ptak z pięknym czubem na głowie!",
     "xenoQuery": "Upupa+epops+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/60494705/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/60494705/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1029700/download"
   },
   {
     "rank": 32,
@@ -317,7 +348,8 @@
     "habitat": "las",
     "teaser": "Największy ptak krukowaty w Polsce.",
     "xenoQuery": "Corvus+corax+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/54389687/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/54389687/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1084372/download"
   },
   {
     "rank": 33,
@@ -327,6 +359,7 @@
     "habitat": "woda",
     "teaser": "Największy orzeł w Polsce — ptak narodowy!",
     "xenoQuery": "Haliaeetus+albicilla+cnt:Poland",
-    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/164904961/medium.jpg"
+    "coverPhoto": "https://inaturalist-open-data.s3.amazonaws.com/photos/164904961/medium.jpg",
+    "soundUrl": "https://xeno-canto.org/1018878/download"
   }
 ]
