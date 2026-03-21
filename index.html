@@ -1708,7 +1708,7 @@ async function loadModalAudienceDesc(audience) {
 async function speakModalAudienceDesc() {
   console.log('speakModalAudienceDesc called', {activeBird: activeBird?.name, text: modalCurrentAudience?.text?.slice(0,30)});
   if (!activeBird || !modalCurrentAudience.text) {
-    console.warn('EARLY RETURN — activeBird:', !!activeBird, 'text:', !!modalCurrentAudience.text);
+    alert('EARLY RETURN: activeBird=' + !!activeBird + ' text=' + !!modalCurrentAudience?.text + ' audience=' + modalCurrentAudience?.audience);
     return;
   }
   const player = document.getElementById('modal-audio-player');
@@ -1735,11 +1735,24 @@ async function speakModalAudienceDesc() {
       headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
       body: JSON.stringify({ birdName: activeBird.name, text: modalCurrentAudience.text, audience: modalCurrentAudience.audience })
     });
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('audio')) {
+      const errText = await res.text();
+      console.error('TTS returned non-audio:', contentType, errText.slice(0,200));
+      if (player) player.innerHTML = '<div style="color:red;font-size:0.85rem;padding:4px">Błąd generowania audio</div>';
+      return;
+    }
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
     if (player) {
-      player.innerHTML = `<audio controls src="${audioUrl}" style="width:100%;margin-top:4px"></audio>`;
+      player.innerHTML = '';
+      const audioEl = document.createElement('audio');
+      audioEl.controls = true;
+      audioEl.style.width = '100%';
+      audioEl.style.marginTop = '4px';
+      audioEl.src = audioUrl;
+      player.appendChild(audioEl);
       player.style.display = 'block';
     }
   } catch(e) {
