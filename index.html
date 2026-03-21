@@ -1223,6 +1223,12 @@ function openModal(rank) {
 }
 
 function closeModalBtn() {
+  // Stop all audio
+  if (typeof birdSoundAudio !== 'undefined' && birdSoundAudio) { birdSoundAudio.pause(); birdSoundAudio = null; }
+  if (typeof currentAudio !== 'undefined' && currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const sndBtn = document.getElementById('modalSoundBtn'); if(sndBtn){sndBtn.classList.remove('playing');sndBtn.innerHTML='🔊 Posłuchaj ptaka';}
+  const ttsBtn = document.getElementById('modal-desc-speak'); if(ttsBtn) ttsBtn.textContent='🔊 Czytaj opis';
   document.getElementById('modalOverlay').classList.remove('open');
   document.body.style.overflow = '';
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
@@ -1232,6 +1238,9 @@ function closeModalBtn() {
 
 function closeModal(event) {
   if (event.target === document.getElementById('modalOverlay')) {
+    if (birdSoundAudio) { birdSoundAudio.pause(); birdSoundAudio = null; }
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     closeModalBtn();
   }
 }
@@ -1256,6 +1265,10 @@ async function playModalSound() {
 
     const audioUrl = activeBird.soundUrl;
     if (!audioUrl) throw new Error('no recording');
+
+    // Stop TTS if playing
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 
     birdSoundAudio = new Audio(audioUrl);
     birdSoundAudio.onended = () => {
@@ -1460,11 +1473,16 @@ async function speakModalAudienceDesc() {
     const blob = await res.blob();
     const audioUrl = URL.createObjectURL(blob);
     audienceAudioCache[cacheKey] = audioUrl;
-    // Play directly like Xeno-canto — no visible player
+    // Stop bird sound if playing
+    if (birdSoundAudio) { birdSoundAudio.pause(); birdSoundAudio = null; const sb2 = document.getElementById('modalSoundBtn'); if(sb2){sb2.classList.remove('playing');sb2.innerHTML='🔊 Posłuchaj ptaka';} }
+    // Play TTS
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
     currentAudio = new Audio(audioUrl);
+    const ttsBtn = document.getElementById('modal-desc-speak');
+    if (ttsBtn) ttsBtn.textContent = '⏹️ Zatrzymaj';
     currentAudio.play().catch(e => console.warn('TTS play error:', e));
-    currentAudio.onended = () => { currentAudio = null; };
+    currentAudio.onended = () => { currentAudio = null; if (ttsBtn) ttsBtn.textContent = '🔊 Czytaj opis'; };
+    currentAudio.onerror = () => { currentAudio = null; if (ttsBtn) ttsBtn.textContent = '🔊 Czytaj opis'; };
     if (player) player.style.display = 'none';
   } catch(e) {
     console.warn('TTS error:', e);
