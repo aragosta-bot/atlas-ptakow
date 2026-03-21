@@ -796,7 +796,7 @@
       <!-- Action buttons -->
       <div class="modal-actions">
         <button class="btn btn-sound" id="modalSoundBtn" onclick="playModalSound()">🔊 Posłuchaj ptaka</button>
-        <button class="btn btn-tts" id="modal-desc-speak" onclick="speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
+        <button class="btn btn-tts" id="modal-desc-speak" onclick="alert('activeBird:' + (activeBird?.name||'null') + ' text:' + (modalCurrentAudience?.text?.slice(0,20)||'null')); speakModalAudienceDesc()" style="display:none">🔊 Czytaj opis</button>
         <div id="modal-audio-player" style="display:none; margin-top:8px"></div>
       </div>
     </div>
