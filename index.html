@@ -1756,8 +1756,9 @@ async function speakModalAudienceDesc() {
       player.style.display = 'block';
     }
   } catch(e) {
+    alert('TTS ERROR: ' + e.message);
     console.warn('TTS error:', e);
-    if (player) player.innerHTML = '';
+    if (player) player.innerHTML = '<div style="color:red">Błąd: ' + e.message + '</div>';
   }
 }
 
