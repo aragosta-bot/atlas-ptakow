@@ -1251,10 +1251,12 @@ function renderCards() {
 
   grid.querySelectorAll('.card').forEach(c => observer.observe(c));
 
-  // Load photos with stagger
-  list.forEach((bird, idx) => {
-    setTimeout(() => loadBirdPhoto(bird.rank, bird.latin), idx * 80);
-  });
+  // Load photos sequentially to avoid throttling
+  (async () => {
+    for (const bird of list) {
+      await loadBirdPhoto(bird.rank, bird.latin);
+    }
+  })();
 }
 
 // ===== PHOTO LOADER =====
