@@ -1263,8 +1263,15 @@ async function playModalSound() {
     const SUPABASE_URL = 'https://cbathyxszczmajuwdrll.supabase.co';
     const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiYXRoeXhzemN6bWFqdXdkcmxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMjc2NzQsImV4cCI6MjA4OTYwMzY3NH0.eHpQMhx4TGCivTpNHxg82Dqdd2DvvA1zLNlQZkCDVmE';
 
-    const audioUrl = activeBird.soundUrl;
-    if (!audioUrl) throw new Error('no recording');
+    // Fetch via Edge Function — Xeno-canto blocks direct browser requests
+    const soundRes = await fetch(`${SUPABASE_URL}/functions/v1/bird-sound`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` },
+      body: JSON.stringify({ latinName: activeBird.latin })
+    });
+    const soundData = await soundRes.json();
+    if (!soundData.url) throw new Error('no recording');
+    const audioUrl = soundData.url;
 
     // Stop TTS if playing
     if (currentAudio) { currentAudio.pause(); currentAudio = null; }
