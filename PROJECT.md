@@ -17,7 +17,7 @@ Interaktywny atlas edukacyjny dla dzieci (4-12 lat) i rodziców. 96 gatunków po
 - OpenAI gpt-5.4-mini — generowanie opisów per grupa wiekowa
 - ElevenLabs (głos Maria) — TTS z cachowaniem
 - iNaturalist API — zdjęcia ptaków
-- Xeno-canto v3 API — nagrania dźwięków
+- Xeno-canto v3 API — nagrania dźwięków (proxy przez Edge Function — Xeno-canto nie ma CORS)
 
 ## Pliki kluczowe
 - `birds.json` — dane 96 ptaków (rank, name, latin, emoji, habitat, teaser, coverPhoto, soundUrl)
@@ -41,6 +41,11 @@ Interaktywny atlas edukacyjny dla dzieci (4-12 lat) i rodziców. 96 gatunków po
 - Lightbox zamiast galerii w modalu
 - 3 taby opisów: Maluch (4-6 lat) / Szkoła (7-9 lat) / Dorosły
 - birds.json zamiast hardcoded danych w HTML
+
+### Dźwięki Xeno-canto (2026-03-23)
+Xeno-canto nie ma nagłówków CORS — przeglądarka blokuje direct Audio() z ich URL.
+Rozwiązanie: Edge Function bird-sound streamuje audio serwerowo jako proxy (`audio/mpeg`).
+Frontend wysyła `soundUrl` z birds.json → Edge Function pobiera z Xeno-canto → streamuje do przeglądarki.
 
 ### Security (2026-03-23)
 - Security audit: 2 krytyczne, 3 wysokie
