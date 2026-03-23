@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const cors = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://atlas-ptakow.vercel.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -10,6 +10,17 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   try {
     const { birdName, text, audience } = await req.json()
+
+    if (!text || typeof text !== 'string') {
+      return new Response(JSON.stringify({ error: 'text is required' }), { status: 400, headers: cors })
+    }
+    if (text.length > 2000) {
+      return new Response(JSON.stringify({ error: 'text too long (max 2000 chars)' }), { status: 400, headers: cors })
+    }
+    if (!birdName || typeof birdName !== 'string' || birdName.length > 100) {
+      return new Response(JSON.stringify({ error: 'invalid birdName' }), { status: 400, headers: cors })
+    }
+
     const aud = audience || 'dorosly'
 
     const supabase = createClient(
