@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "atlas_ptakow_repo",
+  "project_id": "34297ba9-4cff-4b19-8070-81d25cd0baaf"
+}
