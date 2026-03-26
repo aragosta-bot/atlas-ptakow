@@ -58,3 +58,37 @@ Frontend wysyła `soundUrl` z birds.json → Edge Function pobiera z Xeno-canto 
 - [ ] Dodać rate limiting na Edge Functions (Upstash Redis lub DB counter)
 - [ ] Dodać więcej ptaków (cel: 100)
 - [ ] Opisać design system w DESIGN.md
+
+---
+
+## Pivot: Dzieciosferka — Hub Edukacyjny (2026-03-26)
+
+### Decyzja
+Atlas Polskich Ptaków staje się pierwszą sekcją większego hubu edukacyjnego dla dzieci.
+
+### Nowa wizja
+- **Nazwa:** Dzieciosferka
+- **URL:** https://dzieciosferka.vercel.app
+- **Target:** Dzieci 5-12 lat z rodzicami, czasem samodzielnie
+- **Charakter:** Kolorowy, playful, edukacyjny
+
+### Struktura hubu
+- `/` → strona główna hubu (karty sekcji)
+- `/ptaki` → Atlas Polskich Ptaków (migracja obecnego projektu)
+- `/owady` → (przyszłość)
+- `/drzewa` → (przyszłość)
+- `/ssaki` → (przyszłość)
+
+### Nowy stack
+- **Astro** — główny framework (content-heavy, szybki, SEO)
+- **React islands** — interaktywne komponenty (modal ptaka, odtwarzacz audio, quiz)
+- **Tailwind CSS** — stylowanie
+- **Supabase** — zachowany backend (Edge Functions + DB)
+- **Vercel** — hosting
+
+### Status migracji
+- [ ] Architektura (w toku)
+- [ ] Nowe repo dzieciosferka
+- [ ] Migracja Atlas do /ptaki
+- [ ] Strona główna hubu
+- [ ] Deploy na dzieciosferka.vercel.app
